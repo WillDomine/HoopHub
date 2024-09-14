@@ -1,5 +1,14 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:myapp/all.dart';
+
+String capitilize(String text) {
+  if (text.isEmpty) {
+    return text;
+  }
+  String result = text[0].toUpperCase() + text.substring(1);
+  return result;
+}
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -9,8 +18,6 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  int _amountInList = 0;
-
   String _searchText = "";
 
   @override
@@ -30,7 +37,14 @@ class _HomePageState extends State<HomePage> {
               },
               icon: const Icon(Icons.person)),
           actions: [
-            IconButton(onPressed: () {}, icon: const Icon(Icons.settings)),
+            IconButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const TestQuery()),
+                  );
+                },
+                icon: const Icon(Icons.settings)),
           ]),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
@@ -40,21 +54,35 @@ class _HomePageState extends State<HomePage> {
             onChanged: (value) {
               setState(() {
                 _searchText = value;
-                value.length > 2 ? _amountInList = 10 : _amountInList = 0;
               });
             },
             decoration: const InputDecoration(
                 labelText: "Search Player", prefixIcon: Icon(Icons.search)),
           ),
           Expanded(
-            child: ListView.builder(
-                itemCount: _amountInList,
-                itemBuilder: (BuildContext context, int index) {
-                  return ListTile(
-                    title: Text(_searchText),
-                  );
-                }),
-          )
+              child: StreamBuilder(
+                  stream: FirebaseFirestore.instance
+                      .collection('PokemonList')
+                      .orderBy('name')
+                      .startAt([capitilize(_searchText)]).endAt(
+                          [capitilize(_searchText) + '\uf8ff']).snapshots(),
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) {
+                      return const Center(
+                        child: Text("No data found"),
+                      );
+                    }
+                    return ListView.builder(
+                        itemCount: snapshot.data!.docs.length > 10
+                            ? 10
+                            : snapshot.data!.docs.length,
+                        itemBuilder: (context, index) {
+                          DocumentSnapshot doc = snapshot.data!.docs[index];
+                          return ListTile(
+                            title: Text(doc['name']),
+                          );
+                        });
+                  }))
         ]),
       ),
     );
