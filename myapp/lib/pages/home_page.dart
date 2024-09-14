@@ -37,14 +37,7 @@ class _HomePageState extends State<HomePage> {
               },
               icon: const Icon(Icons.person)),
           actions: [
-            IconButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const TestQuery()),
-                  );
-                },
-                icon: const Icon(Icons.settings)),
+            IconButton(onPressed: () {}, icon: const Icon(Icons.settings)),
           ]),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
@@ -80,6 +73,7 @@ class _HomePageState extends State<HomePage> {
                           DocumentSnapshot doc = snapshot.data!.docs[index];
                           return ListTile(
                             title: Text(doc['name']),
+                            subtitle: Text(doc.reference.id),
                           );
                         });
                   }))
