@@ -18,8 +18,6 @@ class _SignInPageState extends State<SignInPage> {
       appBar: AppBar(
         title: const Text("Sign In page"),
         centerTitle: true,
-        backgroundColor: Colors.blue,
-        foregroundColor: Colors.white,
       ),
       body: Padding(
           padding: const EdgeInsets.all(20.0),

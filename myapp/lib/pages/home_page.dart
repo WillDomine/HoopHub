@@ -24,10 +24,8 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-          title: const Text("Home page"),
+          title: const Text("Hoop Hub"),
           centerTitle: true,
-          backgroundColor: Colors.blue,
-          foregroundColor: Colors.white,
           leading: IconButton(
               onPressed: () {
                 Navigator.push(
@@ -55,8 +53,9 @@ class _HomePageState extends State<HomePage> {
           Expanded(
               child: StreamBuilder(
                   stream: FirebaseFirestore.instance
-                      .collection('PokemonList')
-                      .orderBy('name')
+                      .collection('playerslist')
+                      .orderBy('player')
+                      .limit(10)
                       .startAt([capitilize(_searchText)]).endAt(
                           [capitilize(_searchText) + '\uf8ff']).snapshots(),
                   builder: (context, snapshot) {
@@ -71,9 +70,10 @@ class _HomePageState extends State<HomePage> {
                             : snapshot.data!.docs.length,
                         itemBuilder: (context, index) {
                           DocumentSnapshot doc = snapshot.data!.docs[index];
-                          return ListTile(
-                            title: Text(doc['name']),
-                            subtitle: Text(doc.reference.id),
+                          return PlayerListTile(
+                            title: Text(doc['player']),
+                            subtitle: Text(doc['tm']),
+                            uid: doc.reference.id,
                           );
                         });
                   }))
