@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:myapp/pages/player_stats_page.dart';
 
 class PlayerListTile extends ListTile {
   final uid;
@@ -16,7 +17,8 @@ class PlayerListTile extends ListTile {
       title: title,
       subtitle: subtitle,
       onTap: () {
-        print(uid);
+        Navigator.push(context,
+            MaterialPageRoute(builder: (context) => PlayerStatsPage(uid: uid)));
       },
     );
   }
