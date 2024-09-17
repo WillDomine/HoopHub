@@ -52,12 +52,14 @@ class _HomePageState extends State<HomePage> {
           ),
           Expanded(
               child: StreamBuilder(
-                  stream: FirebaseFirestore.instance
-                      .collection('playerslist')
-                      .orderBy('player')
-                      .limit(10)
-                      .startAt([capitilize(_searchText)]).endAt(
-                          [capitilize(_searchText) + '\uf8ff']).snapshots(),
+                  stream: _searchText.length > 2
+                      ? FirebaseFirestore.instance
+                          .collection('playerinfo')
+                          .orderBy('name')
+                          .limit(_searchText.length > 3 ? 3 : 5)
+                          .startAt([capitilize(_searchText)]).endAt(
+                              [capitilize(_searchText) + '\uf8ff']).snapshots()
+                      : null,
                   builder: (context, snapshot) {
                     if (!snapshot.hasData) {
                       return const Center(
@@ -71,9 +73,12 @@ class _HomePageState extends State<HomePage> {
                         itemBuilder: (context, index) {
                           DocumentSnapshot doc = snapshot.data!.docs[index];
                           return PlayerListTile(
-                            title: Text(doc['player']),
-                            subtitle: Text(doc['tm']),
-                            uid: doc.reference.id,
+                            title: Text(doc['name']),
+                            subtitle: Text(
+                                "${doc['firstSeason']} - ${doc['lastSeason']}"),
+                            playerName: doc['name'],
+                            firstSeason: doc['firstSeason'].toString(),
+                            lastSeason: doc['lastSeason'].toString(),
                           );
                         });
                   }))
