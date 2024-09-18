@@ -21,6 +21,11 @@ class _HomePageState extends State<HomePage> {
   String _searchText = "";
 
   @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -59,7 +64,11 @@ class _HomePageState extends State<HomePage> {
                           .limit(_searchText.length > 3 ? 3 : 5)
                           .startAt([capitilize(_searchText)]).endAt(
                               [capitilize(_searchText) + '\uf8ff']).snapshots()
-                      : null,
+                      : FirebaseFirestore.instance
+                          .collection('playerinfo')
+                          .orderBy('name')
+                          .limit(10)
+                          .snapshots(),
                   builder: (context, snapshot) {
                     if (!snapshot.hasData) {
                       return const Center(

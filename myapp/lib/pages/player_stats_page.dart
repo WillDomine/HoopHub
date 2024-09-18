@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
@@ -23,6 +24,10 @@ class _PlayerStatsPageState extends State<PlayerStatsPage> {
   int season = 0;
   List<DropdownMenuItem> seasons = [];
 
+  Map<String, dynamic> playerData = {};
+
+  bool saved = false;
+
   @override
   void initState() {
     super.initState();
@@ -41,6 +46,23 @@ class _PlayerStatsPageState extends State<PlayerStatsPage> {
       appBar: AppBar(
         title: Text(widget.playerName),
         centerTitle: true,
+        actions: [
+          IconButton(
+              onPressed: () {
+                saved
+                    ? RealTimeDB.delete(Auth().currentUser!.uid,
+                        playerData['playerId'].toString())
+                    : RealTimeDB.update(Auth().currentUser!.uid, {
+                        playerData['playerId'].toString():
+                            playerData['playerId']
+                      });
+
+                setState(() {
+                  saved = !saved;
+                });
+              },
+              icon: Icon(saved ? Icons.star : Icons.star_border))
+        ],
       ),
       body: Padding(
           padding: const EdgeInsets.all(20.0),
@@ -77,9 +99,22 @@ class _PlayerStatsPageState extends State<PlayerStatsPage> {
                       return const Center(child: CircularProgressIndicator());
                     }
 
-                    Map<String, dynamic> playerData = snapshot.data!;
+                    playerData = snapshot.data!;
 
-                    return Text(playerData['team']);
+                    return GridView.builder(
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 4),
+                      itemBuilder: (context, index) {
+                        return PlayerStatTile(
+                            statName:
+                                playerData.keys.toList()[index].substring(0, 3),
+                            statValue:
+                                playerData.values.toList()[index].toString());
+                      },
+                      itemCount: playerData.keys.length,
+                      shrinkWrap: true,
+                    );
                   }),
             ],
           )),
