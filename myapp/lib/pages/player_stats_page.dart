@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -26,7 +28,22 @@ class _PlayerStatsPageState extends State<PlayerStatsPage> {
 
   Map<String, dynamic> playerData = {};
 
-  bool saved = false;
+  bool? saved;
+
+  void checkIfSaved(String playerId) async {
+    RealTimeDB.read(Auth().currentUser!.uid).then((value) {
+      print(value);
+      if (value != null && value[playerId] != null) {
+        setState(() {
+          saved = true;
+        });
+      } else {
+        setState(() {
+          saved = false;
+        });
+      }
+    });
+  }
 
   @override
   void initState() {
@@ -49,7 +66,7 @@ class _PlayerStatsPageState extends State<PlayerStatsPage> {
         actions: [
           IconButton(
               onPressed: () {
-                saved
+                saved ?? false
                     ? RealTimeDB.delete(Auth().currentUser!.uid,
                         playerData['playerId'].toString())
                     : RealTimeDB.update(Auth().currentUser!.uid, {
@@ -58,10 +75,10 @@ class _PlayerStatsPageState extends State<PlayerStatsPage> {
                       });
 
                 setState(() {
-                  saved = !saved;
+                  saved ?? false ? saved = false : saved = true;
                 });
               },
-              icon: Icon(saved ? Icons.star : Icons.star_border))
+              icon: Icon(saved ?? false ? Icons.star : Icons.star_border)),
         ],
       ),
       body: Padding(
@@ -100,6 +117,8 @@ class _PlayerStatsPageState extends State<PlayerStatsPage> {
                     }
 
                     playerData = snapshot.data!;
+
+                    checkIfSaved(playerData['playerId'].toString());
 
                     return GridView.builder(
                       gridDelegate:
