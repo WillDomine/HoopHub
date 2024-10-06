@@ -85,9 +85,8 @@ class _HomePageState extends State<HomePage> {
                             title: Text(doc['name']),
                             subtitle: Text(
                                 "${doc['firstSeason']} - ${doc['lastSeason']}"),
-                            playerName: doc['name'],
-                            firstSeason: doc['firstSeason'].toString(),
-                            lastSeason: doc['lastSeason'].toString(),
+                            player: Player(doc['name'],
+                                doc['firstSeason'].toString(), doc['lastSeason'].toString()),
                           );
                         });
                   }))

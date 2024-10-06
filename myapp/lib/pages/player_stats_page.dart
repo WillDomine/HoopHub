@@ -1,22 +1,16 @@
-import 'dart:ffi';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
 import 'package:myapp/all.dart';
 
 class PlayerStatsPage extends StatefulWidget {
-  final String playerName;
-  final String firstSeason;
-  final String lastSeason;
+  
+  final Player player;
 
   const PlayerStatsPage(
       {super.key,
-      required this.playerName,
-      required this.firstSeason,
-      required this.lastSeason});
+      required this.player
+      });
 
   @override
   State<PlayerStatsPage> createState() => _PlayerStatsPageState();
@@ -33,10 +27,10 @@ class _PlayerStatsPageState extends State<PlayerStatsPage> {
   @override
   void initState() {
     super.initState();
-    season = int.parse(widget.lastSeason);
+    season = int.parse(widget.player.firstSeason);
 
-    for (int i = int.parse(widget.firstSeason);
-        i <= int.parse(widget.lastSeason);
+    for (int i = int.parse(widget.player.firstSeason);
+        i <= int.parse(widget.player.lastSeason);
         i++) {
       seasons.add(DropdownMenuItem(value: i, child: Text(i.toString())));
     }
@@ -46,7 +40,7 @@ class _PlayerStatsPageState extends State<PlayerStatsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.playerName),
+        title: Text(widget.player.name),
         centerTitle: true,
         actions: [
           IconButton(
@@ -88,7 +82,7 @@ class _PlayerStatsPageState extends State<PlayerStatsPage> {
               FutureBuilder(
                   future: FirebaseFirestore.instance
                       .collection('PlayerSeasonStats')
-                      .where('name', isEqualTo: widget.playerName)
+                      .where('name', isEqualTo: widget.player.name)
                       .where('season', isEqualTo: season)
                       .limit(1)
                       .get()

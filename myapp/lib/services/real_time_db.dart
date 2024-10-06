@@ -1,6 +1,4 @@
 import 'package:firebase_database/firebase_database.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:myapp/all.dart';
 
 class RealTimeDB {
   static void write(String userId, Map<String, dynamic> data) async {
@@ -22,7 +20,6 @@ class RealTimeDB {
         return null;
       }
     } catch (e) {
-      print(e);
       return null;
     }
   }
@@ -34,7 +31,6 @@ class RealTimeDB {
       await ref.remove();
       return true;
     } catch (e) {
-      print(e);
       return false;
     }
   }
@@ -45,7 +41,6 @@ class RealTimeDB {
       await ref.update(data);
       return true;
     } catch (e) {
-      print(e);
       return false;
     }
   }
