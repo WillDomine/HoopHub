@@ -72,7 +72,7 @@ class _HomePageState extends State<HomePage> {
                   builder: (context, snapshot) {
                     if (!snapshot.hasData) {
                       return const Center(
-                        child: Text("No data found"),
+                        child: CircularProgressIndicator(),
                       );
                     }
                     return ListView.builder(

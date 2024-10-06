@@ -30,21 +30,6 @@ class _PlayerStatsPageState extends State<PlayerStatsPage> {
 
   bool? saved;
 
-  void checkIfSaved(String playerId) async {
-    RealTimeDB.read(Auth().currentUser!.uid).then((value) {
-      print(value);
-      if (value != null && value[playerId] != null) {
-        setState(() {
-          saved = true;
-        });
-      } else {
-        setState(() {
-          saved = false;
-        });
-      }
-    });
-  }
-
   @override
   void initState() {
     super.initState();
@@ -66,14 +51,14 @@ class _PlayerStatsPageState extends State<PlayerStatsPage> {
         actions: [
           IconButton(
               onPressed: () {
-                saved ?? false
+                /* saved ?? false
                     ? RealTimeDB.delete(Auth().currentUser!.uid,
                         playerData['playerId'].toString())
                     : RealTimeDB.update(Auth().currentUser!.uid, {
                         playerData['playerId'].toString():
                             playerData['playerId']
                       });
-
+                */
                 setState(() {
                   saved ?? false ? saved = false : saved = true;
                 });
@@ -117,8 +102,6 @@ class _PlayerStatsPageState extends State<PlayerStatsPage> {
                     }
 
                     playerData = snapshot.data!;
-
-                    checkIfSaved(playerData['playerId'].toString());
 
                     return GridView.builder(
                       gridDelegate:
