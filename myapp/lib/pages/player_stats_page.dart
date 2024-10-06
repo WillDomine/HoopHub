@@ -4,13 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:myapp/all.dart';
 
 class PlayerStatsPage extends StatefulWidget {
-  
   final Player player;
 
-  const PlayerStatsPage(
-      {super.key,
-      required this.player
-      });
+  const PlayerStatsPage({super.key, required this.player});
 
   @override
   State<PlayerStatsPage> createState() => _PlayerStatsPageState();
@@ -39,13 +35,13 @@ class _PlayerStatsPageState extends State<PlayerStatsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.player.name),
-        centerTitle: true,
-        actions: [
-          IconButton(
-              onPressed: () {
-                /* saved ?? false
+        appBar: AppBar(
+          title: Text(widget.player.name),
+          centerTitle: true,
+          actions: [
+            IconButton(
+                onPressed: () {
+                  /* saved ?? false
                     ? RealTimeDB.delete(Auth().currentUser!.uid,
                         playerData['playerId'].toString())
                     : RealTimeDB.update(Auth().currentUser!.uid, {
@@ -53,33 +49,33 @@ class _PlayerStatsPageState extends State<PlayerStatsPage> {
                             playerData['playerId']
                       });
                 */
-                setState(() {
-                  saved ?? false ? saved = false : saved = true;
-                });
-              },
-              icon: Icon(saved ?? false ? Icons.star : Icons.star_border)),
-        ],
-      ),
-      body: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Column(
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  DropdownButton(
-                      borderRadius: BorderRadius.circular(10.0),
-                      underline: const SizedBox(),
-                      value: season,
-                      items: seasons,
-                      onChanged: (value) {
-                        setState(() {
-                          season = value!;
-                        });
-                      }),
-                ],
-              ),
-              FutureBuilder(
+                  setState(() {
+                    saved ?? false ? saved = false : saved = true;
+                  });
+                },
+                icon: Icon(saved ?? false ? Icons.star : Icons.star_border)),
+          ],
+        ),
+        body: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                DropdownButton(
+                    borderRadius: BorderRadius.circular(10.0),
+                    underline: const SizedBox(),
+                    value: season,
+                    items: seasons,
+                    onChanged: (value) {
+                      setState(() {
+                        season = value!;
+                      });
+                    }),
+              ],
+            ),
+            Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: FutureBuilder(
                   future: FirebaseFirestore.instance
                       .collection('PlayerSeasonStats')
                       .where('name', isEqualTo: widget.player.name)
@@ -97,23 +93,10 @@ class _PlayerStatsPageState extends State<PlayerStatsPage> {
 
                     playerData = snapshot.data!;
 
-                    return GridView.builder(
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 4),
-                      itemBuilder: (context, index) {
-                        return PlayerStatTile(
-                            statName:
-                                playerData.keys.toList()[index].substring(0, 3),
-                            statValue:
-                                playerData.values.toList()[index].toString());
-                      },
-                      itemCount: playerData.keys.length,
-                      shrinkWrap: true,
-                    );
+                    return Text(playerData.toString());
                   }),
-            ],
-          )),
-    );
+            )
+          ],
+        ));
   }
 }
