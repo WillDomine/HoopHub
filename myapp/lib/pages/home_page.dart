@@ -2,6 +2,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:myapp/all.dart';
 
+/// Capitalize the first letter of a given string and return the result.
+///
+/// If the given string is empty, return the same string.
+///
+/// Example:
+///   capitilize('hello') // 'Hello'
 String capitilize(String text) {
   if (text.isEmpty) {
     return text;
@@ -10,6 +16,8 @@ String capitilize(String text) {
   return result;
 }
 
+// HomePage Class StatefulWidget
+// Used to search for players based on name
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
@@ -18,12 +26,8 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  // Text field controller, but easier to monitor then TextEditingController, may change later to TextFieldController
   String _searchText = "";
-
-  @override
-  void initState() {
-    super.initState();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,6 +35,8 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
           title: const Text("Hoop Hub"),
           centerTitle: true,
+
+          //IconButton to go to ProfilePage
           leading: IconButton(
               onPressed: () {
                 Navigator.push(
@@ -40,12 +46,15 @@ class _HomePageState extends State<HomePage> {
               },
               icon: const Icon(Icons.person)),
           actions: [
+            //IconButton to go to SettingsPage
             IconButton(onPressed: () {}, icon: const Icon(Icons.settings)),
           ]),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(children: [
           const SizedBox(height: 20.0),
+
+          //Search Bar to search for players
           TextField(
             onChanged: (value) {
               setState(() {
@@ -55,7 +64,10 @@ class _HomePageState extends State<HomePage> {
             decoration: const InputDecoration(
                 labelText: "Search Player", prefixIcon: Icon(Icons.search)),
           ),
+
+          //List of players certain amount displayed based on the length of the search text
           Expanded(
+              //Used to query the players from the database
               child: StreamBuilder(
                   stream: _searchText.length > 2
                       ? FirebaseFirestore.instance
@@ -70,11 +82,14 @@ class _HomePageState extends State<HomePage> {
                           .limit(10)
                           .snapshots(),
                   builder: (context, snapshot) {
+                    //Used if there is no data in the query
                     if (!snapshot.hasData) {
                       return const Center(
                         child: CircularProgressIndicator(),
                       );
                     }
+
+                    //Used ListView.builder to display the players from StreamBuilder
                     return ListView.builder(
                         itemCount: snapshot.data!.docs.length > 10
                             ? 10
@@ -85,8 +100,10 @@ class _HomePageState extends State<HomePage> {
                             title: Text(doc['name']),
                             subtitle: Text(
                                 "${doc['firstSeason']} - ${doc['lastSeason']}"),
-                            player: Player(doc['name'],
-                                doc['firstSeason'].toString(), doc['lastSeason'].toString()),
+                            player: Player(
+                                doc['name'],
+                                doc['firstSeason'].toString(),
+                                doc['lastSeason'].toString()),
                           );
                         });
                   }))

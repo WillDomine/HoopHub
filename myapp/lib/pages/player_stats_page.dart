@@ -13,6 +13,7 @@ class PlayerStatsPage extends StatefulWidget {
 }
 
 class _PlayerStatsPageState extends State<PlayerStatsPage> {
+  /// The season the user is currently viewing
   int season = 0;
   List<DropdownMenuItem> seasons = [];
 
