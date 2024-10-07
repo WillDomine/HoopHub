@@ -69,6 +69,7 @@ class _HomePageState extends State<HomePage> {
           Expanded(
               //Used to query the players from the database
               child: StreamBuilder(
+                  //If the search text is longer than 2 characters query 5 if greater than 3 characters query 3
                   stream: _searchText.length > 2
                       ? FirebaseFirestore.instance
                           .collection('playerinfo')
@@ -76,6 +77,7 @@ class _HomePageState extends State<HomePage> {
                           .limit(_searchText.length > 3 ? 3 : 5)
                           .startAt([capitilize(_searchText)]).endAt(
                               ['${capitilize(_searchText)}\uf8ff']).snapshots()
+                      //If the search text is less than 3 characters query 10 players based on name order !Idea add cashing and timesclicked to database!
                       : FirebaseFirestore.instance
                           .collection('playerinfo')
                           .orderBy('name')
