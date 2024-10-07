@@ -75,7 +75,7 @@ class _HomePageState extends State<HomePage> {
                           .orderBy('name')
                           .limit(_searchText.length > 3 ? 3 : 5)
                           .startAt([capitilize(_searchText)]).endAt(
-                              [capitilize(_searchText) + '\uf8ff']).snapshots()
+                              ['${capitilize(_searchText)}\uf8ff']).snapshots()
                       : FirebaseFirestore.instance
                           .collection('playerinfo')
                           .orderBy('name')
