@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:myapp/pages/player_stats_page.dart';
 import 'package:myapp/models/player_model.dart';
 
+//
+// List tile to display players on HomePage and directs to PlayerStatsPage
+//
 class PlayerListTile extends ListTile {
   final Player player;
 

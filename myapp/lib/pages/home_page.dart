@@ -15,9 +15,10 @@ String capitilize(String text) {
   String result = text[0].toUpperCase() + text.substring(1);
   return result;
 }
-
+//
 // HomePage Class StatefulWidget
 // Used to search for players based on name
+//
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 

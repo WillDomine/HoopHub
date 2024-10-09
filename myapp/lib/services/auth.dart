@@ -1,12 +1,17 @@
 import 'package:firebase_auth/firebase_auth.dart';
 
+// Auth Service for handling Firebase Authentication
 class Auth {
+  // Initialize Firebase Auth
   final FirebaseAuth auth = FirebaseAuth.instance;
 
+  // Get the current user
   User? get currentUser => auth.currentUser;
 
+  // Get the auth state
   Stream<User?> get authStateChanges => auth.authStateChanges();
 
+  // Sign in with email and password
   Future<(bool, String)> signInWithEmail(String email, String password) async {
     String error = "";
     try {
@@ -19,7 +24,7 @@ class Auth {
     }
     return (false, error);
   }
-
+  // Sign up with email and password
   Future<(bool, String)> signUpWithEmail(String email, String password) async {
     String error = "";
     try {
@@ -38,7 +43,7 @@ class Auth {
 
     return (false, error);
   }
-
+  // Sign out
   Future<bool> signOut() async {
     try {
       await auth.signOut();
@@ -48,7 +53,7 @@ class Auth {
       return false;
     }
   }
-
+  // Reset password
   Future<bool> resetPassword(String email) async {
     try {
       await auth.sendPasswordResetEmail(email: email);
@@ -60,7 +65,7 @@ class Auth {
     }
     return false;
   }
-
+  // Delete user: Currently Not Used!
   Future<bool> deleteUser() async {
     try {
       await auth.currentUser!.delete();

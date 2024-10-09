@@ -1,6 +1,8 @@
 import 'package:firebase_database/firebase_database.dart';
 
+// Realtime Database Service
 class RealTimeDB {
+  // Write data to Realtime Database
   static void write(String userId, Map<String, dynamic> data) async {
     try {
       DatabaseReference ref = FirebaseDatabase.instance.ref('users/$userId');
@@ -10,6 +12,7 @@ class RealTimeDB {
     }
   }
 
+  // Read data from Realtime Database
   static Future<Map<String, dynamic>?> read(String userId) async {
     try {
       DatabaseReference ref = FirebaseDatabase.instance.ref('users/$userId');
@@ -23,7 +26,7 @@ class RealTimeDB {
       return null;
     }
   }
-
+  // Delete data from Realtime Database
   static Future<bool> delete(String userId, String playerId) async {
     try {
       DatabaseReference ref =
@@ -35,6 +38,7 @@ class RealTimeDB {
     }
   }
 
+  // Update data from Realtime Database
   static Future<bool> update(String userId, Map<String, dynamic> data) async {
     try {
       DatabaseReference ref = FirebaseDatabase.instance.ref('users/$userId');

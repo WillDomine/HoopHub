@@ -3,6 +3,10 @@ import 'package:flutter/material.dart';
 
 import 'package:myapp/all.dart';
 
+//
+// PlayerStatsPage Class StatefulWidget
+// Used to display player stats on player profile page
+//
 class PlayerStatsPage extends StatefulWidget {
   final Player player;
 
@@ -13,19 +17,25 @@ class PlayerStatsPage extends StatefulWidget {
 }
 
 class _PlayerStatsPageState extends State<PlayerStatsPage> {
-  /// The season the user is currently viewing
+  // The season the user is currently viewing
   int season = 0;
+
+  // List of seasons to be displayed
   List<DropdownMenuItem> seasons = [];
 
+  // The player's data to be displayed
   Map<String, dynamic> playerData = {};
 
+  // Whether the player is saved or not
   bool? saved;
 
   @override
   void initState() {
     super.initState();
+    // Set the season and seasons to be displayed
     season = int.parse(widget.player.firstSeason);
 
+    // Get the seasons
     for (int i = int.parse(widget.player.firstSeason);
         i <= int.parse(widget.player.lastSeason);
         i++) {
@@ -40,6 +50,7 @@ class _PlayerStatsPageState extends State<PlayerStatsPage> {
           title: Text(widget.player.name),
           centerTitle: true,
           actions: [
+            // Save button
             IconButton(
                 onPressed: () {
                   /* saved ?? false
@@ -62,6 +73,7 @@ class _PlayerStatsPageState extends State<PlayerStatsPage> {
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
+                // Season dropdown menu
                 DropdownButton(
                     borderRadius: BorderRadius.circular(10.0),
                     underline: const SizedBox(),
@@ -76,6 +88,7 @@ class _PlayerStatsPageState extends State<PlayerStatsPage> {
             ),
             Padding(
               padding: const EdgeInsets.all(20.0),
+              // Display the player's data
               child: FutureBuilder(
                   future: FirebaseFirestore.instance
                       .collection('PlayerSeasonStats')
