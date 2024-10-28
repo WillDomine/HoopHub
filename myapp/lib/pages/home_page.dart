@@ -15,6 +15,7 @@ String capitilize(String text) {
   String result = text[0].toUpperCase() + text.substring(1);
   return result;
 }
+
 //
 // HomePage Class StatefulWidget
 // Used to search for players based on name
@@ -29,6 +30,14 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   // Text field controller, but easier to monitor then TextEditingController, may change later to TextFieldController
   String _searchText = "";
+
+  @override
+  void initState() {
+    super.initState();
+    setState(() {
+      UserData.init();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -106,7 +115,8 @@ class _HomePageState extends State<HomePage> {
                             player: Player(
                                 doc['name'],
                                 doc['firstSeason'].toString(),
-                                doc['lastSeason'].toString()),
+                                doc['lastSeason'].toString(),
+                                doc.id),
                           );
                         });
                   }))

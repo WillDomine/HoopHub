@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 
@@ -12,6 +13,14 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
+  @override
+  void initState() {
+    super.initState();
+    setState(() {
+      UserData.init();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -31,6 +40,23 @@ class _ProfilePageState extends State<ProfilePage> {
                   ListTile(
                     title: Text(Auth().currentUser?.email ?? ""),
                     subtitle: const Text("Email"),
+                  ),
+                  const SizedBox(height: 20.0),
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: UserData.savedPlayers.length,
+                      itemBuilder: (context, index) {
+                        return ListTile(
+                            title: Text(UserData.savedPlayers[index]),
+                            trailing: IconButton(
+                              icon: const Icon(Icons.delete),
+                              onPressed: () {
+                                UserData.removePlayer(
+                                    UserData.savedPlayers[index]);
+                              },
+                            ));
+                      },
+                    ),
                   ),
                   const SizedBox(height: 20.0),
                   Row(

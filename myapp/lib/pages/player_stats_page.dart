@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-
 import 'package:myapp/all.dart';
 
 //
@@ -27,13 +26,18 @@ class _PlayerStatsPageState extends State<PlayerStatsPage> {
   Map<String, dynamic> playerData = {};
 
   // Whether the player is saved or not
-  bool? saved;
+  bool saved = false;
 
   @override
   void initState() {
     super.initState();
     // Set the season and seasons to be displayed
     season = int.parse(widget.player.firstSeason);
+
+    // Set the saved variable
+    UserData.savedPlayers.contains(widget.player.playerId)
+        ? saved = true
+        : saved = false;
 
     // Get the seasons
     for (int i = int.parse(widget.player.firstSeason);
@@ -53,19 +57,14 @@ class _PlayerStatsPageState extends State<PlayerStatsPage> {
             // Save button
             IconButton(
                 onPressed: () {
-                  /* saved ?? false
-                    ? RealTimeDB.delete(Auth().currentUser!.uid,
-                        playerData['playerId'].toString())
-                    : RealTimeDB.update(Auth().currentUser!.uid, {
-                        playerData['playerId'].toString():
-                            playerData['playerId']
-                      });
-                */
+                  RealTimeDB.write("0", {
+                    'playerId': widget.player.playerId,
+                  });
                   setState(() {
-                    saved ?? false ? saved = false : saved = true;
+                    saved ? saved = false : saved = true;
                   });
                 },
-                icon: Icon(saved ?? false ? Icons.star : Icons.star_border)),
+                icon: Icon(saved ? Icons.star : Icons.star_border)),
           ],
         ),
         body: Column(
