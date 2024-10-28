@@ -24,6 +24,7 @@ class Auth {
     }
     return (false, error);
   }
+
   // Sign up with email and password
   Future<(bool, String)> signUpWithEmail(String email, String password) async {
     String error = "";
@@ -43,6 +44,7 @@ class Auth {
 
     return (false, error);
   }
+
   // Sign out
   Future<bool> signOut() async {
     try {
@@ -53,6 +55,7 @@ class Auth {
       return false;
     }
   }
+
   // Reset password
   Future<bool> resetPassword(String email) async {
     try {
@@ -65,6 +68,7 @@ class Auth {
     }
     return false;
   }
+
   // Delete user: Currently Not Used!
   Future<bool> deleteUser() async {
     try {
