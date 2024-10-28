@@ -34,11 +34,6 @@ class _PlayerStatsPageState extends State<PlayerStatsPage> {
     // Set the season and seasons to be displayed
     season = int.parse(widget.player.firstSeason);
 
-    // Set the saved variable
-    UserData.savedPlayers.contains(widget.player.playerId)
-        ? saved = true
-        : saved = false;
-
     // Get the seasons
     for (int i = int.parse(widget.player.firstSeason);
         i <= int.parse(widget.player.lastSeason);
@@ -57,9 +52,6 @@ class _PlayerStatsPageState extends State<PlayerStatsPage> {
             // Save button
             IconButton(
                 onPressed: () {
-                  RealTimeDB.write("0", {
-                    'playerId': widget.player.playerId,
-                  });
                   setState(() {
                     saved ? saved = false : saved = true;
                   });

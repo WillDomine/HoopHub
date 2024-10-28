@@ -14,7 +14,6 @@ export 'widgets/player_stat_tile.dart';
 // Services
 export 'services/auth.dart';
 export 'services/real_time_db.dart';
-export 'services/user.dart';
 
 // Models
 export 'models/player_model.dart';

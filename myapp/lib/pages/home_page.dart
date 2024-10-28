@@ -32,14 +32,6 @@ class _HomePageState extends State<HomePage> {
   String _searchText = "";
 
   @override
-  void initState() {
-    super.initState();
-    setState(() {
-      UserData.init();
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(

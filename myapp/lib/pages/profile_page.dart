@@ -14,14 +14,6 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage> {
   @override
-  void initState() {
-    super.initState();
-    setState(() {
-      UserData.init();
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -40,23 +32,6 @@ class _ProfilePageState extends State<ProfilePage> {
                   ListTile(
                     title: Text(Auth().currentUser?.email ?? ""),
                     subtitle: const Text("Email"),
-                  ),
-                  const SizedBox(height: 20.0),
-                  Expanded(
-                    child: ListView.builder(
-                      itemCount: UserData.savedPlayers.length,
-                      itemBuilder: (context, index) {
-                        return ListTile(
-                            title: Text(UserData.savedPlayers[index]),
-                            trailing: IconButton(
-                              icon: const Icon(Icons.delete),
-                              onPressed: () {
-                                UserData.removePlayer(
-                                    UserData.savedPlayers[index]);
-                              },
-                            ));
-                      },
-                    ),
                   ),
                   const SizedBox(height: 20.0),
                   Row(
