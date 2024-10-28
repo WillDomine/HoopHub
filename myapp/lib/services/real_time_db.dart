@@ -9,7 +9,6 @@ class RealTimeDB {
       await ref.set(data);
       return true;
     } catch (e) {
-      print(e);
       return false;
     }
   }
