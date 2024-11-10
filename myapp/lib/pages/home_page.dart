@@ -13,6 +13,38 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   TextEditingController searchController = TextEditingController();
 
+  String? selectedValue;
+  void onChanged(String? value) {
+    setState(() {
+      selectedValue = value;
+    });
+  }
+
+  List<DropdownMenuItem<String>> teamsDropdownItems = [];
+
+  @override
+  void initState() {
+    super.initState();
+
+    Supabase.instance.client
+        .from('teams')
+        .select('abbreviation')
+        .eq('season', '2025')
+        .then((value) {
+      for (var team in value) {
+        print(team['abbreviation']);
+        teamsDropdownItems.add(DropdownMenuItem(
+          value: team['abbreviation'],
+          child: Text(team['abbreviation']),
+        ));
+      }
+
+      setState(() {
+        selectedValue = teamsDropdownItems[0].value;
+      });
+    });
+  }
+
   Widget searchPlayerTab() {
     return ListView(
       children: [
@@ -35,13 +67,23 @@ class _HomePageState extends State<HomePage> {
                     ),
                     leading: Icon(Icons.search),
                   ),
+                  Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        DropdownButton(
+                            underline: const SizedBox(),
+                            icon: const SizedBox(),
+                            items: teamsDropdownItems,
+                            onChanged: onChanged,
+                            value: selectedValue),
+                      ]),
                   const Divider(height: 20, thickness: 2.0),
                   StreamBuilder(
                       stream: Supabase.instance.client
                           .from('players')
                           .select('*')
                           .ilike('player', '%${searchController.text}%')
-                          .order('time_clicked', ascending: false)
+                          .order('times_clicked', ascending: false)
                           .limit(5)
                           .asStream(),
                       builder: (context, snapshot) {
@@ -73,18 +115,21 @@ class _HomePageState extends State<HomePage> {
                                     Supabase.instance.client
                                         .from('players')
                                         .update({
-                                      'time_clicked': player['time_clicked'] + 1
-                                    }).eq('player', player['player']);
+                                          'times_clicked':
+                                              player['times_clicked'] + 1
+                                        })
+                                        .eq('player_id', player['player_id'])
+                                        .ignore();
                                   },
-                                  leading: SizedBox(
+                                  /*leading: SizedBox(
                                       width: 70,
                                       height: 70,
                                       child: Image.network(Supabase
                                           .instance.client.storage
                                           .from('player_images')
                                           .getPublicUrl(
-                                            'lebron.jpg',
-                                          ))),
+                                            '${player['player'].toString().split(' ')[0].toLowerCase()}.jpg',
+                                          ))),*/
                                   title: Text(player['player']),
                                   subtitle: Text(
                                       '${player['first_seas']} - ${player['last_seas']}'),
@@ -109,7 +154,7 @@ class _HomePageState extends State<HomePage> {
           IconButton(
               icon: const Icon(Icons.logout),
               onPressed: () async {
-                if (await AuthService.isSignedIn()) {
+                if (await AuthService.signOut()) {
                   Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
