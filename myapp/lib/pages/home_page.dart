@@ -37,6 +37,12 @@ class _HomePageState extends State<HomePage> {
           child: Text(team['abbreviation']),
         ));
       }
+      teamsDropdownItems.insert(
+          0,
+          const DropdownMenuItem(
+            value: '',
+            child: Text('All Teams'),
+          ));
 
       setState(() {
         selectedValue = teamsDropdownItems[0].value;
@@ -66,17 +72,15 @@ class _HomePageState extends State<HomePage> {
                     ),
                     leading: Icon(Icons.search),
                   ),
-                  Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        DropdownButton(
-                            menuMaxHeight: 250,
-                            underline: const SizedBox(),
-                            icon: const SizedBox(),
-                            items: teamsDropdownItems,
-                            onChanged: onChanged,
-                            value: selectedValue),
-                      ]),
+                  Row(mainAxisAlignment: MainAxisAlignment.start, children: [
+                    DropdownButton(
+                        menuMaxHeight: 250,
+                        underline: const SizedBox(),
+                        icon: const SizedBox(),
+                        items: teamsDropdownItems,
+                        onChanged: onChanged,
+                        value: selectedValue),
+                  ]),
                   const Divider(height: 20, thickness: 2.0),
                   StreamBuilder(
                       stream: Supabase.instance.client
