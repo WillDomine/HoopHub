@@ -32,7 +32,6 @@ class _HomePageState extends State<HomePage> {
         .eq('season', '2025')
         .then((value) {
       for (var team in value) {
-        print(team['abbreviation']);
         teamsDropdownItems.add(DropdownMenuItem(
           value: team['abbreviation'],
           child: Text(team['abbreviation']),
@@ -68,9 +67,10 @@ class _HomePageState extends State<HomePage> {
                     leading: Icon(Icons.search),
                   ),
                   Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      mainAxisAlignment: MainAxisAlignment.start,
                       children: [
                         DropdownButton(
+                            menuMaxHeight: 250,
                             underline: const SizedBox(),
                             icon: const SizedBox(),
                             items: teamsDropdownItems,
