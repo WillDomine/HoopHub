@@ -15,27 +15,49 @@ class _HomePageState extends State<HomePage> {
 
   String searchPlayer = '';
 
-  String? selectedValue;
+  String? teamSelectedValue;
 
-  void onChanged(String? value) {
+  String? seasonSelectedValue;
+
+  void teamChanged(String? value) {
     setState(() {
-      selectedValue = value;
+      teamSelectedValue = value;
+    });
+  }
+
+  void seasonChanged(String? value) {
+    setState(() {
+      seasonSelectedValue = value;
     });
   }
 
   List<DropdownMenuItem<String>> teamsDropdownItems = [];
+  List<DropdownMenuItem<String>> seasonsDropdownItems = [];
 
-  @override
-  void initState() {
-    super.initState();
+  void createSeasonDropdown() {
+    var firstSeason = 1947;
+    var lastSeason = DateTime.now().year + 1;
 
-    Supabase.instance.client
-        .rpc('searchTeam', params: {'search': ''})
-        .limit(5)
-        .then((value) {
-          print(value);
-        });
+    for (var i = lastSeason; i >= firstSeason; i--) {
+      seasonsDropdownItems.add(DropdownMenuItem(
+        value: i.toString(),
+        child: Text(i.toString()),
+      ));
+    }
 
+    seasonsDropdownItems.insert(
+        0,
+        const DropdownMenuItem(
+          value: '',
+          child: Text('All Seasons'),
+        ));
+
+    setState(() {
+      seasonSelectedValue = seasonsDropdownItems[0].value;
+    });
+  }
+
+  void createTeamDropdown() {
     Supabase.instance.client
         .from('teams')
         .select('abbreviation')
@@ -55,9 +77,17 @@ class _HomePageState extends State<HomePage> {
           ));
 
       setState(() {
-        selectedValue = teamsDropdownItems[0].value;
+        teamSelectedValue = teamsDropdownItems[0].value;
       });
     });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    createTeamDropdown();
+    createSeasonDropdown();
   }
 
   Widget searchPlayerTab() {
@@ -75,6 +105,8 @@ class _HomePageState extends State<HomePage> {
                         });
                       },
                       controller: searchController,
+                      autocorrect: false,
+                      enableSuggestions: false,
                       decoration: const InputDecoration(
                         border: OutlineInputBorder(),
                         labelText: 'Search by player name',
@@ -89,17 +121,29 @@ class _HomePageState extends State<HomePage> {
                         underline: const SizedBox(),
                         icon: const SizedBox(),
                         items: teamsDropdownItems,
-                        onChanged: onChanged,
-                        value: selectedValue),
+                        onChanged: teamChanged,
+                        value: teamSelectedValue),
+                    const Spacer(),
+                    DropdownButton(
+                        menuMaxHeight: 250,
+                        underline: const SizedBox(),
+                        icon: const SizedBox(),
+                        items: seasonsDropdownItems,
+                        onChanged: seasonChanged,
+                        value: seasonSelectedValue),
                   ]),
                   const Divider(height: 20, thickness: 2.0),
                   StreamBuilder(
                       stream: Supabase.instance.client
-                          .from('players')
-                          .select('*')
-                          .ilike('player', '%$searchPlayer%')
-                          .order('times_clicked', ascending: false)
-                          .limit(5)
+                          .rpc('search_player', params: {
+                            'player_search': searchPlayer,
+                            'player_year': seasonSelectedValue,
+                            'player_team': teamSelectedValue
+                          })
+                          .limit(seasonSelectedValue == '' &&
+                                  teamSelectedValue == ''
+                              ? 10
+                              : 100)
                           .asStream(),
                       builder: (context, snapshot) {
                         if (snapshot.connectionState ==
