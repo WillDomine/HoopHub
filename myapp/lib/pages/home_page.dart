@@ -13,7 +13,10 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   TextEditingController searchController = TextEditingController();
 
+  String searchPlayer = '';
+
   String? selectedValue;
+
   void onChanged(String? value) {
     setState(() {
       selectedValue = value;
@@ -25,6 +28,13 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+
+    Supabase.instance.client
+        .rpc('searchTeam', params: {'search': ''})
+        .limit(5)
+        .then((value) {
+          print(value);
+        });
 
     Supabase.instance.client
         .from('teams')
@@ -61,7 +71,7 @@ class _HomePageState extends State<HomePage> {
                     title: TextField(
                       onChanged: (value) {
                         setState(() {
-                          searchController.text = value;
+                          searchPlayer = value;
                         });
                       },
                       controller: searchController,
@@ -72,6 +82,7 @@ class _HomePageState extends State<HomePage> {
                     ),
                     leading: Icon(Icons.search),
                   ),
+                  const Divider(height: 20, thickness: 2.0),
                   Row(mainAxisAlignment: MainAxisAlignment.start, children: [
                     DropdownButton(
                         menuMaxHeight: 250,
@@ -86,7 +97,7 @@ class _HomePageState extends State<HomePage> {
                       stream: Supabase.instance.client
                           .from('players')
                           .select('*')
-                          .ilike('player', '%${searchController.text}%')
+                          .ilike('player', '%$searchPlayer%')
                           .order('times_clicked', ascending: false)
                           .limit(5)
                           .asStream(),
