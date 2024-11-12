@@ -91,6 +91,8 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget searchPlayerTab() {
+    String capitalize(String s) => s[0].toUpperCase() + s.substring(1);
+
     return ListView(
       children: [
         Center(
@@ -165,7 +167,8 @@ class _HomePageState extends State<HomePage> {
                           itemCount: snapshot.data!.length,
                           itemBuilder: (context, index) {
                             var player = snapshot.data![index];
-
+                            var nameSplit =
+                                player['player'].toString().split(' ');
                             return Card(
                               child: Padding(
                                 padding: const EdgeInsets.all(10),
@@ -180,15 +183,15 @@ class _HomePageState extends State<HomePage> {
                                         .eq('player_id', player['player_id'])
                                         .ignore();
                                   },
-                                  /*leading: SizedBox(
+                                  leading: SizedBox(
                                       width: 70,
                                       height: 70,
                                       child: Image.network(Supabase
                                           .instance.client.storage
                                           .from('player_images')
                                           .getPublicUrl(
-                                            '${player['player'].toString().split(' ')[0].toLowerCase()}.jpg',
-                                          ))),*/
+                                            '${capitalize(nameSplit[0])}_${nameSplit[1]}.png',
+                                          ))),
                                   title: Text(player['player']),
                                   subtitle: Text(
                                       '${player['first_seas']} - ${player['last_seas']}'),
