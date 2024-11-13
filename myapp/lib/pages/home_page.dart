@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:myapp/pages/entry_portal.dart';
+import 'package:myapp/pages/entry_portal_page.dart';
 import 'package:myapp/services/auth_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:myapp/pages/player_stats_page.dart';
+import 'package:myapp/models/player_model.dart';
+import 'package:myapp/methods.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -91,8 +94,6 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget searchPlayerTab() {
-    String capitalize(String s) => s[0].toUpperCase() + s.substring(1);
-
     return ListView(
       children: [
         Center(
@@ -142,10 +143,10 @@ class _HomePageState extends State<HomePage> {
                             'player_year': seasonSelectedValue,
                             'player_team': teamSelectedValue
                           })
-                          .limit(seasonSelectedValue == '' &&
-                                  teamSelectedValue == ''
+                          .limit((seasonSelectedValue == '' &&
+                                  teamSelectedValue == '')
                               ? 10
-                              : 100)
+                              : 50)
                           .asStream(),
                       builder: (context, snapshot) {
                         if (snapshot.connectionState ==
@@ -162,39 +163,49 @@ class _HomePageState extends State<HomePage> {
                           return const Text('No data available');
                         }
 
+                        List<Player> players = [];
+                        for (var player in snapshot.data!) {
+                          players.add(Player.fromJson(player));
+                        }
+
                         return ListView.builder(
+                          physics: const ScrollPhysics(),
                           shrinkWrap: true,
-                          itemCount: snapshot.data!.length,
+                          itemCount: players.length,
                           itemBuilder: (context, index) {
-                            var player = snapshot.data![index];
-                            var nameSplit =
-                                player['player'].toString().split(' ');
+                            var player = players[index];
+                            var nameSplit = player.playerName.split(' ');
                             return Card(
                               child: Padding(
-                                padding: const EdgeInsets.all(10),
+                                padding: const EdgeInsets.all(5.0),
                                 child: ListTile(
                                   onTap: () {
                                     Supabase.instance.client
                                         .from('players')
                                         .update({
                                           'times_clicked':
-                                              player['times_clicked'] + 1
+                                              player.timesClicked + 1
                                         })
-                                        .eq('player_id', player['player_id'])
+                                        .eq('player_id', player.playerId)
                                         .ignore();
+
+                                    Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => PlayerStatsPage(
+                                            player: player,
+                                            selectedSeason:
+                                                seasonSelectedValue as String,
+                                          ),
+                                        ));
                                   },
-                                  leading: SizedBox(
-                                      width: 70,
-                                      height: 70,
-                                      child: Image.network(Supabase
-                                          .instance.client.storage
-                                          .from('player_images')
-                                          .getPublicUrl(
-                                            '${capitalize(nameSplit[0])}_${nameSplit[1]}.png',
-                                          ))),
-                                  title: Text(player['player']),
+                                  leading: CircleAvatar(
+                                      backgroundColor: Colors.transparent,
+                                      radius: 40,
+                                      child: Methods.getPlayerImage(nameSplit)),
+                                  title: Text(player.playerName),
                                   subtitle: Text(
-                                      '${player['first_seas']} - ${player['last_seas']}'),
+                                      '${player.firstSeason} - ${player.lastSeason}'),
                                 ),
                               ),
                             );
