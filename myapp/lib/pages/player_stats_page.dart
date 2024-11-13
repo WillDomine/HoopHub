@@ -19,8 +19,9 @@ class _PlayerStatsPageState extends State<PlayerStatsPage> {
 
   String? selectedSeason;
 
-  bool all_star = false;
+  bool allStar = false;
 
+  bool? saved;
   @override
   void initState() {
     super.initState();
@@ -32,8 +33,12 @@ class _PlayerStatsPageState extends State<PlayerStatsPage> {
     Supabase.instance.client.rpc('search_if_allstar',
         params: {'player_name': widget.player.playerName}).then((value) {
       setState(() {
-        all_star = value > 0 ? true : false;
+        allStar = value > 0 ? true : false;
       });
+    });
+    //
+    checkIfSaved().then((value) {
+      saved = value;
     });
     //Get player data
     Stream stream = Supabase.instance.client
@@ -50,13 +55,59 @@ class _PlayerStatsPageState extends State<PlayerStatsPage> {
     });
   }
 
+  Future<bool> checkIfSaved() async {
+    var data =
+        await Supabase.instance.client.from('saved_players').select('*').match({
+      'player_id': widget.player.playerId,
+    });
+    return data.isEmpty ? false : true;
+  }
+
+  Future<void> deletePlayer() async {
+    await Supabase.instance.client.from('saved_players').delete().match({
+      'player_id': widget.player.playerId,
+    }).then((value) {
+      checkIfSaved().then((value) {
+        setState(() {
+          saved = value;
+        });
+      });
+    });
+  }
+
+  Future<void> savePlayer() async {
+    await Supabase.instance.client.from('saved_players').insert({
+      'player_id': widget.player.playerId,
+      'user_id': Supabase.instance.client.auth.currentUser!.id
+    }).then((value) {
+      checkIfSaved().then((value) {
+        setState(() {
+          saved = value;
+        });
+      });
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     var nameSplit = widget.player.playerName.split(' ');
     return Scaffold(
         appBar: AppBar(
-          title: Text(widget.player.playerName),
+          title: Text(
+            widget.player.playerName,
+            style: const TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+          ),
           centerTitle: false,
+          actions: [
+            IconButton(
+                onPressed: () {
+                  if (saved == null) {
+                    return;
+                  }
+                  saved ?? false ? deletePlayer() : savePlayer();
+                },
+                icon: Icon(saved ?? false ? Icons.star : Icons.star_border))
+          ],
         ),
         body: Center(
           child: Padding(
@@ -67,6 +118,7 @@ class _PlayerStatsPageState extends State<PlayerStatsPage> {
                 height: MediaQuery.of(context).size.height * 0.3,
                 child: Methods.getPlayerImage(nameSplit),
               ),
+              const Divider(height: 20, thickness: 2.0),
             ]),
           ),
         ));

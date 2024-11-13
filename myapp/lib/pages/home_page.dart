@@ -146,7 +146,7 @@ class _HomePageState extends State<HomePage> {
                           .limit((seasonSelectedValue == '' &&
                                   teamSelectedValue == '')
                               ? 10
-                              : 50)
+                              : 30)
                           .asStream(),
                       builder: (context, snapshot) {
                         if (snapshot.connectionState ==
