@@ -3,8 +3,9 @@ import 'package:myapp/pages/entry_portal_page.dart';
 import 'package:myapp/services/auth_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:myapp/pages/player_stats_page.dart';
-import 'package:myapp/models/player_model.dart';
+import 'package:myapp/models/player_model_tile.dart';
 import 'package:myapp/methods.dart';
+import 'package:myapp/pages/user_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -115,7 +116,7 @@ class _HomePageState extends State<HomePage> {
                         labelText: 'Search by player name',
                       ),
                     ),
-                    leading: Icon(Icons.search),
+                    leading: const Icon(Icons.search),
                   ),
                   const Divider(height: 20, thickness: 2.0),
                   Row(mainAxisAlignment: MainAxisAlignment.start, children: [
@@ -163,9 +164,9 @@ class _HomePageState extends State<HomePage> {
                           return const Text('No data available');
                         }
 
-                        List<Player> players = [];
+                        List<PlayerTile> players = [];
                         for (var player in snapshot.data!) {
-                          players.add(Player.fromJson(player));
+                          players.add(PlayerTile.fromJson(player));
                         }
 
                         return ListView.builder(
@@ -225,16 +226,15 @@ class _HomePageState extends State<HomePage> {
         centerTitle: false,
         actions: [
           IconButton(
-              icon: const Icon(Icons.logout),
-              onPressed: () async {
-                if (await AuthService.signOut()) {
-                  Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const EntryPortal(),
-                      ));
-                }
-              })
+            icon: const Icon(Icons.person),
+            onPressed: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const UserPage(),
+                  ));
+            },
+          ),
         ],
       ),
       body: searchPlayerTab(),

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:myapp/models/player_model.dart';
+import 'package:myapp/models/player_model_tile.dart';
 import 'package:myapp/methods.dart';
 
 class PlayerStatsPage extends StatefulWidget {
-  final Player player;
+  final PlayerTile player;
   final String selectedSeason;
 
   const PlayerStatsPage(

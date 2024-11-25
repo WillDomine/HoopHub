@@ -1,12 +1,12 @@
-class Player {
+class PlayerTile {
   final int playerId;
   final String playerName;
   final int firstSeason;
   final int lastSeason;
   final int timesClicked;
 
-  factory Player.fromJson(Map<String, dynamic> json) {
-    return Player(
+  factory PlayerTile.fromJson(Map<String, dynamic> json) {
+    return PlayerTile(
       playerId: json['player_id'],
       playerName: json['player'],
       firstSeason: json['first_seas'],
@@ -15,7 +15,7 @@ class Player {
     );
   }
 
-  Player({
+  PlayerTile({
     required this.playerId,
     required this.playerName,
     required this.firstSeason,
