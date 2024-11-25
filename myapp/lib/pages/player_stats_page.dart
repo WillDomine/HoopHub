@@ -1,107 +1,126 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:myapp/all.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:myapp/models/player_model.dart';
+import 'package:myapp/methods.dart';
 
-//
-// PlayerStatsPage Class StatefulWidget
-// Used to display player stats on player profile page
-//
 class PlayerStatsPage extends StatefulWidget {
   final Player player;
+  final String selectedSeason;
 
-  const PlayerStatsPage({super.key, required this.player});
+  const PlayerStatsPage(
+      {super.key, required this.player, required this.selectedSeason});
 
   @override
   State<PlayerStatsPage> createState() => _PlayerStatsPageState();
 }
 
 class _PlayerStatsPageState extends State<PlayerStatsPage> {
-  // The season the user is currently viewing
-  int season = 0;
-
-  // List of seasons to be displayed
-  List<DropdownMenuItem> seasons = [];
-
-  // The player's data to be displayed
   Map<String, dynamic> playerData = {};
 
-  // Whether the player is saved or not
-  bool saved = false;
+  String? selectedSeason;
 
+  bool allStar = false;
+
+  bool? saved;
   @override
   void initState() {
     super.initState();
-    // Set the season and seasons to be displayed
-    season = int.parse(widget.player.firstSeason);
+    //Set selected season to last season if no season is selected
+    widget.selectedSeason == ''
+        ? selectedSeason = widget.player.lastSeason.toString()
+        : selectedSeason = widget.selectedSeason;
+    //Check if player is an all star
+    Supabase.instance.client.rpc('search_if_allstar',
+        params: {'player_name': widget.player.playerName}).then((value) {
+      setState(() {
+        allStar = value > 0 ? true : false;
+      });
+    });
+    //
+    checkIfSaved().then((value) {
+      saved = value;
+    });
+    //Get player data
+    Stream stream = Supabase.instance.client
+        .from('player_stats')
+        .select('*')
+        .eq('player', widget.player.playerName)
+        .eq('season', selectedSeason as Object)
+        .asStream();
 
-    // Get the seasons
-    for (int i = int.parse(widget.player.firstSeason);
-        i <= int.parse(widget.player.lastSeason);
-        i++) {
-      seasons.add(DropdownMenuItem(value: i, child: Text(i.toString())));
-    }
+    stream.listen((event) {
+      setState(() {
+        playerData = event[0];
+      });
+    });
+  }
+
+  Future<bool> checkIfSaved() async {
+    var data =
+        await Supabase.instance.client.from('saved_players').select('*').match({
+      'player_id': widget.player.playerId,
+    });
+    return data.isEmpty ? false : true;
+  }
+
+  Future<void> deletePlayer() async {
+    await Supabase.instance.client.from('saved_players').delete().match({
+      'player_id': widget.player.playerId,
+    }).then((value) {
+      checkIfSaved().then((value) {
+        setState(() {
+          saved = value;
+        });
+      });
+    });
+  }
+
+  Future<void> savePlayer() async {
+    await Supabase.instance.client.from('saved_players').insert({
+      'player_id': widget.player.playerId,
+      'user_id': Supabase.instance.client.auth.currentUser!.id
+    }).then((value) {
+      checkIfSaved().then((value) {
+        setState(() {
+          saved = value;
+        });
+      });
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    var nameSplit = widget.player.playerName.split(' ');
     return Scaffold(
         appBar: AppBar(
-          title: Text(widget.player.name),
-          centerTitle: true,
+          title: Text(
+            widget.player.playerName,
+            style: const TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+          ),
+          centerTitle: false,
           actions: [
-            // Save button
             IconButton(
                 onPressed: () {
-                  setState(() {
-                    saved ? saved = false : saved = true;
-                  });
+                  if (saved == null) {
+                    return;
+                  }
+                  saved ?? false ? deletePlayer() : savePlayer();
                 },
-                icon: Icon(saved ? Icons.star : Icons.star_border)),
+                icon: Icon(saved ?? false ? Icons.star : Icons.star_border))
           ],
         ),
-        body: Column(
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                // Season dropdown menu
-                DropdownButton(
-                    borderRadius: BorderRadius.circular(10.0),
-                    underline: const SizedBox(),
-                    value: season,
-                    items: seasons,
-                    onChanged: (value) {
-                      setState(() {
-                        season = value!;
-                      });
-                    }),
-              ],
-            ),
-            Padding(
-              padding: const EdgeInsets.all(20.0),
-              // Display the player's data
-              child: FutureBuilder(
-                  future: FirebaseFirestore.instance
-                      .collection('PlayerSeasonStats')
-                      .where('name', isEqualTo: widget.player.name)
-                      .where('season', isEqualTo: season)
-                      .limit(1)
-                      .get()
-                      .then((value) {
-                    return value.docs[0].data();
-                  }),
-                  builder:
-                      (context, AsyncSnapshot<Map<String, dynamic>> snapshot) {
-                    if (!snapshot.hasData) {
-                      return const Center(child: CircularProgressIndicator());
-                    }
-
-                    playerData = snapshot.data!;
-
-                    return Text(playerData.toString());
-                  }),
-            )
-          ],
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(10.0),
+            child: Column(children: [
+              SizedBox(
+                width: MediaQuery.of(context).size.width,
+                height: MediaQuery.of(context).size.height * 0.3,
+                child: Methods.getPlayerImage(nameSplit),
+              ),
+              const Divider(height: 20, thickness: 2.0),
+            ]),
+          ),
         ));
   }
 }

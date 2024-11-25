@@ -1,25 +1,11 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:myapp/all.dart';
+import 'package:myapp/pages/entry_portal_page.dart';
+import 'package:myapp/services/auth_service.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:myapp/pages/player_stats_page.dart';
+import 'package:myapp/models/player_model.dart';
+import 'package:myapp/methods.dart';
 
-/// Capitalize the first letter of a given string and return the result.
-///
-/// If the given string is empty, return the same string.
-///
-/// Example:
-///   capitilize('hello') // 'Hello'
-String capitilize(String text) {
-  if (text.isEmpty) {
-    return text;
-  }
-  String result = text[0].toUpperCase() + text.substring(1);
-  return result;
-}
-
-//
-// HomePage Class StatefulWidget
-// Used to search for players based on name
-//
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
@@ -28,92 +14,230 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  // Text field controller, but easier to monitor then TextEditingController, may change later to TextFieldController
-  String _searchText = "";
+  TextEditingController searchController = TextEditingController();
+
+  String searchPlayer = '';
+
+  String? teamSelectedValue;
+
+  String? seasonSelectedValue;
+
+  void teamChanged(String? value) {
+    setState(() {
+      teamSelectedValue = value;
+    });
+  }
+
+  void seasonChanged(String? value) {
+    setState(() {
+      seasonSelectedValue = value;
+    });
+  }
+
+  List<DropdownMenuItem<String>> teamsDropdownItems = [];
+  List<DropdownMenuItem<String>> seasonsDropdownItems = [];
+
+  void createSeasonDropdown() {
+    var firstSeason = 1947;
+    var lastSeason = DateTime.now().year + 1;
+
+    for (var i = lastSeason; i >= firstSeason; i--) {
+      seasonsDropdownItems.add(DropdownMenuItem(
+        value: i.toString(),
+        child: Text(i.toString()),
+      ));
+    }
+
+    seasonsDropdownItems.insert(
+        0,
+        const DropdownMenuItem(
+          value: '',
+          child: Text('All Seasons'),
+        ));
+
+    setState(() {
+      seasonSelectedValue = seasonsDropdownItems[0].value;
+    });
+  }
+
+  void createTeamDropdown() {
+    Supabase.instance.client
+        .from('teams')
+        .select('abbreviation')
+        .eq('season', '2025')
+        .then((value) {
+      for (var team in value) {
+        teamsDropdownItems.add(DropdownMenuItem(
+          value: team['abbreviation'],
+          child: Text(team['abbreviation']),
+        ));
+      }
+      teamsDropdownItems.insert(
+          0,
+          const DropdownMenuItem(
+            value: '',
+            child: Text('All Teams'),
+          ));
+
+      setState(() {
+        teamSelectedValue = teamsDropdownItems[0].value;
+      });
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    createTeamDropdown();
+    createSeasonDropdown();
+  }
+
+  Widget searchPlayerTab() {
+    return ListView(
+      children: [
+        Center(
+            child: Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Column(children: [
+                  ListTile(
+                    title: TextField(
+                      onChanged: (value) {
+                        setState(() {
+                          searchPlayer = value;
+                        });
+                      },
+                      controller: searchController,
+                      autocorrect: false,
+                      enableSuggestions: false,
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                        labelText: 'Search by player name',
+                      ),
+                    ),
+                    leading: Icon(Icons.search),
+                  ),
+                  const Divider(height: 20, thickness: 2.0),
+                  Row(mainAxisAlignment: MainAxisAlignment.start, children: [
+                    DropdownButton(
+                        menuMaxHeight: 250,
+                        underline: const SizedBox(),
+                        icon: const SizedBox(),
+                        items: teamsDropdownItems,
+                        onChanged: teamChanged,
+                        value: teamSelectedValue),
+                    const Spacer(),
+                    DropdownButton(
+                        menuMaxHeight: 250,
+                        underline: const SizedBox(),
+                        icon: const SizedBox(),
+                        items: seasonsDropdownItems,
+                        onChanged: seasonChanged,
+                        value: seasonSelectedValue),
+                  ]),
+                  const Divider(height: 20, thickness: 2.0),
+                  StreamBuilder(
+                      stream: Supabase.instance.client
+                          .rpc('search_player', params: {
+                            'player_search': searchPlayer,
+                            'player_year': seasonSelectedValue,
+                            'player_team': teamSelectedValue
+                          })
+                          .limit((seasonSelectedValue == '' &&
+                                  teamSelectedValue == '')
+                              ? 10
+                              : 30)
+                          .asStream(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const CircularProgressIndicator();
+                        }
+
+                        if (snapshot.hasError) {
+                          print(snapshot.error);
+                          return const Text('Database error!');
+                        }
+
+                        if (!snapshot.hasData) {
+                          return const Text('No data available');
+                        }
+
+                        List<Player> players = [];
+                        for (var player in snapshot.data!) {
+                          players.add(Player.fromJson(player));
+                        }
+
+                        return ListView.builder(
+                          physics: const ScrollPhysics(),
+                          shrinkWrap: true,
+                          itemCount: players.length,
+                          itemBuilder: (context, index) {
+                            var player = players[index];
+                            var nameSplit = player.playerName.split(' ');
+                            return Card(
+                              child: Padding(
+                                padding: const EdgeInsets.all(5.0),
+                                child: ListTile(
+                                  onTap: () {
+                                    Supabase.instance.client
+                                        .from('players')
+                                        .update({
+                                          'times_clicked':
+                                              player.timesClicked + 1
+                                        })
+                                        .eq('player_id', player.playerId)
+                                        .ignore();
+
+                                    Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => PlayerStatsPage(
+                                            player: player,
+                                            selectedSeason:
+                                                seasonSelectedValue as String,
+                                          ),
+                                        ));
+                                  },
+                                  leading: CircleAvatar(
+                                      backgroundColor: Colors.transparent,
+                                      radius: 40,
+                                      child: Methods.getPlayerImage(nameSplit)),
+                                  title: Text(player.playerName),
+                                  subtitle: Text(
+                                      '${player.firstSeason} - ${player.lastSeason}'),
+                                ),
+                              ),
+                            );
+                          },
+                        );
+                      }),
+                ])))
+      ],
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-          title: const Text("Hoop Hub"),
-          centerTitle: true,
-
-          //IconButton to go to ProfilePage
-          leading: IconButton(
-              onPressed: () {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const ProfilePage()));
-              },
-              icon: const Icon(Icons.person)),
-          actions: [
-            //IconButton to go to SettingsPage
-            IconButton(onPressed: () {}, icon: const Icon(Icons.settings)),
-          ]),
-      body: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(children: [
-          const SizedBox(height: 20.0),
-
-          //Search Bar to search for players
-          TextField(
-            onChanged: (value) {
-              setState(() {
-                _searchText = value;
-              });
-            },
-            decoration: const InputDecoration(
-                labelText: "Search Player", prefixIcon: Icon(Icons.search)),
-          ),
-
-          //List of players certain amount displayed based on the length of the search text
-          Expanded(
-              //Used to query the players from the database
-              child: StreamBuilder(
-                  //If the search text is longer than 2 characters query 5 if greater than 3 characters query 3
-                  stream: _searchText.length > 2
-                      ? FirebaseFirestore.instance
-                          .collection('playerinfo')
-                          .orderBy('name')
-                          .limit(_searchText.length > 3 ? 3 : 5)
-                          .startAt([capitilize(_searchText)]).endAt(
-                              ['${capitilize(_searchText)}\uf8ff']).snapshots()
-                      //If the search text is less than 3 characters query 10 players based on name order !Idea add cashing and timesclicked to database!
-                      : FirebaseFirestore.instance
-                          .collection('playerinfo')
-                          .orderBy('name')
-                          .limit(10)
-                          .snapshots(),
-                  builder: (context, snapshot) {
-                    //Used if there is no data in the query
-                    if (!snapshot.hasData) {
-                      return const Center(
-                        child: CircularProgressIndicator(),
-                      );
-                    }
-
-                    //Used ListView.builder to display the players from StreamBuilder
-                    return ListView.builder(
-                        itemCount: snapshot.data!.docs.length > 10
-                            ? 10
-                            : snapshot.data!.docs.length,
-                        itemBuilder: (context, index) {
-                          DocumentSnapshot doc = snapshot.data!.docs[index];
-                          return PlayerListTile(
-                            title: Text(doc['name']),
-                            subtitle: Text(
-                                "${doc['firstSeason']} - ${doc['lastSeason']}"),
-                            player: Player(
-                                doc['name'],
-                                doc['firstSeason'].toString(),
-                                doc['lastSeason'].toString(),
-                                doc.id),
-                          );
-                        });
-                  }))
-        ]),
+        title: const Text('Home Page'),
+        centerTitle: false,
+        actions: [
+          IconButton(
+              icon: const Icon(Icons.logout),
+              onPressed: () async {
+                if (await AuthService.signOut()) {
+                  Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const EntryPortal(),
+                      ));
+                }
+              })
+        ],
       ),
+      body: searchPlayerTab(),
     );
   }
 }

@@ -1,11 +1,25 @@
-//
-// Model for player data to be used in query
-//
 class Player {
-  final String name;
-  final String firstSeason;
-  final String lastSeason;
-  final String? playerId;
+  final int playerId;
+  final String playerName;
+  final int firstSeason;
+  final int lastSeason;
+  final int timesClicked;
 
-  Player(this.name, this.firstSeason, this.lastSeason, this.playerId);
+  factory Player.fromJson(Map<String, dynamic> json) {
+    return Player(
+      playerId: json['player_id'],
+      playerName: json['player'],
+      firstSeason: json['first_seas'],
+      lastSeason: json['last_seas'],
+      timesClicked: json['times_clicked'],
+    );
+  }
+
+  Player({
+    required this.playerId,
+    required this.playerName,
+    required this.firstSeason,
+    required this.lastSeason,
+    required this.timesClicked,
+  });
 }
