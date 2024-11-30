@@ -99,14 +99,25 @@ class _PlayerStatsPageState extends State<PlayerStatsPage> {
           ),
           centerTitle: false,
           actions: [
-            IconButton(
-                onPressed: () {
-                  if (saved == null) {
-                    return;
-                  }
-                  saved ?? false ? deletePlayer() : savePlayer();
-                },
-                icon: Icon(saved ?? false ? Icons.star : Icons.star_border))
+            Tooltip(
+                triggerMode: TooltipTriggerMode.tap,
+                message: 'All Star',
+                child: Icon(
+                  allStar ? Icons.star : Icons.star_border,
+                  color: Colors.amber,
+                )),
+            Tooltip(
+              triggerMode: TooltipTriggerMode.tap,
+              message: saved ?? false ? 'Unsave' : 'Save',
+              child: IconButton(
+                  icon: Icon(
+                      saved ?? false ? Icons.bookmark : Icons.bookmark_border),
+                  onPressed: () {
+                    setState(() {
+                      saved! ? deletePlayer() : savePlayer();
+                    });
+                  }),
+            )
           ],
         ),
         body: Center(

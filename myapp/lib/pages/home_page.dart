@@ -156,7 +156,6 @@ class _HomePageState extends State<HomePage> {
                         }
 
                         if (snapshot.hasError) {
-                          print(snapshot.error);
                           return const Text('Database error!');
                         }
 

@@ -9,6 +9,12 @@ class UserPage extends StatefulWidget {
 }
 
 class _UserPageState extends State<UserPage> {
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -20,6 +26,11 @@ class _UserPageState extends State<UserPage> {
             icon: Icon(false ? Icons.dark_mode : Icons.light_mode),
             onPressed: () {}),
       ],
+    ),
+    body: Scaffold(
+      body: Center(
+        
+      ),
     ));
   }
 }
