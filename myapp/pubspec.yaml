@@ -38,6 +38,8 @@ dependencies:
   supabase_flutter: ^2.8.0
   http: ^1.2.2
   path_provider: ^2.1.5
+  unicons: ^3.0.0
+  font_awesome_flutter: ^10.8.0
 
 dev_dependencies:
   flutter_test:

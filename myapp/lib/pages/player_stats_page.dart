@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:myapp/models/player_model_tile.dart';
 import 'package:myapp/methods.dart';
+import 'package:myapp/models/player_model_profile.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class PlayerStatsPage extends StatefulWidget {
-  final PlayerTile player;
+  final PlayerModelTile player;
   final String selectedSeason;
 
   const PlayerStatsPage(
@@ -15,11 +17,13 @@ class PlayerStatsPage extends StatefulWidget {
 }
 
 class _PlayerStatsPageState extends State<PlayerStatsPage> {
-  Map<String, dynamic> playerData = {};
+  List<PlayerModelProfile> playerData = [];
 
   String? selectedSeason;
 
   bool allStar = false;
+
+  bool hof = false;
 
   bool? saved;
   @override
@@ -36,21 +40,26 @@ class _PlayerStatsPageState extends State<PlayerStatsPage> {
         allStar = value > 0 ? true : false;
       });
     });
-    //
+    //Check if player is a hall of famer
+    Supabase.instance.client.rpc('search_if_hof',
+        params: {'pid': widget.player.playerId}).then((value) {
+      setState(() {
+        hof = value;
+      });
+    });
+    //Check if player is saved or not
     checkIfSaved().then((value) {
       saved = value;
     });
     //Get player data
-    Stream stream = Supabase.instance.client
-        .from('player_stats')
+    Supabase.instance.client
+        .from('player_year_stats')
         .select('*')
-        .eq('player', widget.player.playerName)
-        .eq('season', selectedSeason as Object)
-        .asStream();
-
-    stream.listen((event) {
+        .eq('player_id', widget.player.playerId)
+        .then((value) {
+      playerData = value.map((e) => PlayerModelProfile.fromJson(e)).toList();
       setState(() {
-        playerData = event[0];
+        playerData = playerData.reversed.toList();
       });
     });
   }
@@ -99,6 +108,14 @@ class _PlayerStatsPageState extends State<PlayerStatsPage> {
           ),
           centerTitle: false,
           actions: [
+            hof
+                ? const Tooltip(
+                    triggerMode: TooltipTriggerMode.tap,
+                    message: 'Hall of Fame',
+                    child: FaIcon(FontAwesomeIcons.crown, color: Colors.amber),
+                  )
+                : const SizedBox(),
+            const SizedBox(width: 20),
             Tooltip(
                 triggerMode: TooltipTriggerMode.tap,
                 message: 'All Star',
@@ -130,6 +147,38 @@ class _PlayerStatsPageState extends State<PlayerStatsPage> {
                 child: Methods.getPlayerImage(nameSplit),
               ),
               const Divider(height: 20, thickness: 2.0),
+              Expanded(
+                child: ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: playerData.length,
+                    itemBuilder: (context, index) {
+                      return Card(
+                          child: Padding(
+                              padding: const EdgeInsets.all(10.0),
+                              child: Column(children: [
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceEvenly,
+                                  children: [
+                                    Text('Season: ${playerData[index].season}'),
+                                    Text('Team: ${playerData[index].team}'),
+                                    Text('Games: ${playerData[index].games}'),
+                                  ],
+                                ),
+                                Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceEvenly,
+                                    children: [
+                                      Text(
+                                          'FG: ${playerData[index].fgPercent}'),
+                                      Text(
+                                          '3PT: ${playerData[index].x3Percent}'),
+                                      Text(
+                                          'FT: ${playerData[index].ftPercent}'),
+                                    ])
+                              ])));
+                    }),
+              )
             ]),
           ),
         ));

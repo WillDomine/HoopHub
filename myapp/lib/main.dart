@@ -20,6 +20,8 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  ThemeMode _themeMode = ThemeMode.dark;
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -27,7 +29,7 @@ class _MyAppState extends State<MyApp> {
       title: 'HoopHub',
       theme: ThemeData.light(),
       darkTheme: ThemeData.dark(),
-      themeMode: ThemeMode.dark,
+      themeMode: _themeMode,
       home: const EntryPortal(),
     );
   }

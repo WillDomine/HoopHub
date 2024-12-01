@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:myapp/pages/entry_portal_page.dart';
-import 'package:myapp/services/auth_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:myapp/pages/player_stats_page.dart';
 import 'package:myapp/models/player_model_tile.dart';
@@ -156,6 +154,7 @@ class _HomePageState extends State<HomePage> {
                         }
 
                         if (snapshot.hasError) {
+                          print(snapshot.error);
                           return const Text('Database error!');
                         }
 
@@ -163,9 +162,9 @@ class _HomePageState extends State<HomePage> {
                           return const Text('No data available');
                         }
 
-                        List<PlayerTile> players = [];
+                        List<PlayerModelTile> players = [];
                         for (var player in snapshot.data!) {
-                          players.add(PlayerTile.fromJson(player));
+                          players.add(PlayerModelTile.fromJson(player));
                         }
 
                         return ListView.builder(
