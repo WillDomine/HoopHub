@@ -36,6 +36,11 @@ class _HomePageState extends State<HomePage> {
   List<DropdownMenuItem<String>> teamsDropdownItems = [];
   List<DropdownMenuItem<String>> seasonsDropdownItems = [];
 
+  /// Generates a list of [DropdownMenuItem]s for the season dropdown menu.
+  ///
+  /// The list starts with a "All Seasons" item and then contains each year
+  /// from the current year down to 1947. The list is sorted in descending
+  /// order.
   void createSeasonDropdown() {
     var firstSeason = 1947;
     var lastSeason = DateTime.now().year + 1;
@@ -59,6 +64,14 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  /// Generates a list of [DropdownMenuItem]s for the team dropdown menu.
+  ///
+  /// The list starts with a "All Teams" item and then contains each team's
+  /// abbreviation in the 2025 season. The list is sorted in ascending order
+  /// by team abbreviation.
+  ///
+  /// When the list is generated, the selected team is set to the first item
+  /// in the list.
   void createTeamDropdown() {
     Supabase.instance.client
         .from('teams')
@@ -173,7 +186,6 @@ class _HomePageState extends State<HomePage> {
                           itemCount: players.length,
                           itemBuilder: (context, index) {
                             var player = players[index];
-                            var nameSplit = player.playerName.split(' ');
                             return Card(
                               child: Padding(
                                 padding: const EdgeInsets.all(5.0),
@@ -201,7 +213,8 @@ class _HomePageState extends State<HomePage> {
                                   leading: CircleAvatar(
                                       backgroundColor: Colors.transparent,
                                       radius: 40,
-                                      child: Methods.getPlayerImage(nameSplit)),
+                                      child: Methods.getPlayerImage(
+                                          player.playerName)),
                                   title: Text(player.playerName),
                                   subtitle: Text(
                                       '${player.firstSeason} - ${player.lastSeason}'),

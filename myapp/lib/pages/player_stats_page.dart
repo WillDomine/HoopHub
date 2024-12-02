@@ -144,7 +144,7 @@ class _PlayerStatsPageState extends State<PlayerStatsPage> {
               SizedBox(
                 width: MediaQuery.of(context).size.width,
                 height: MediaQuery.of(context).size.height * 0.3,
-                child: Methods.getPlayerImage(nameSplit),
+                child: Methods.getPlayerImage(widget.player.playerName),
               ),
               const Divider(height: 20, thickness: 2.0),
               Expanded(
@@ -152,31 +152,36 @@ class _PlayerStatsPageState extends State<PlayerStatsPage> {
                     shrinkWrap: true,
                     itemCount: playerData.length,
                     itemBuilder: (context, index) {
-                      return Card(
-                          child: Padding(
-                              padding: const EdgeInsets.all(10.0),
-                              child: Column(children: [
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceEvenly,
-                                  children: [
-                                    Text('Season: ${playerData[index].season}'),
-                                    Text('Team: ${playerData[index].team}'),
-                                    Text('Games: ${playerData[index].games}'),
-                                  ],
-                                ),
-                                Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceEvenly,
-                                    children: [
-                                      Text(
-                                          'FG: ${playerData[index].fgPercent}'),
-                                      Text(
-                                          '3PT: ${playerData[index].x3Percent}'),
-                                      Text(
-                                          'FT: ${playerData[index].ftPercent}'),
-                                    ])
-                              ])));
+                      return ExpansionTile(
+                          collapsedTextColor: Colors.grey,
+                          initiallyExpanded: selectedSeason ==
+                              playerData[index].season.toString(),
+                          leading: Methods.getTeamImage(playerData[index].team),
+                          title: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              Text('Season: ${playerData[index].season}'),
+                              Text('Games: ${playerData[index].games}'),
+                            ],
+                          ),
+                          children: [
+                            Card(
+                                child: Padding(
+                                    padding: const EdgeInsets.all(10.0),
+                                    child: Column(children: [
+                                      Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceEvenly,
+                                          children: [
+                                            Text(
+                                                'FG: ${playerData[index].fgPercent}'),
+                                            Text(
+                                                '3PT: ${playerData[index].x3Percent}'),
+                                            Text(
+                                                'FT: ${playerData[index].ftPercent}'),
+                                          ])
+                                    ])))
+                          ]);
                     }),
               )
             ]),

@@ -1,31 +1,41 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class Methods {
   static String capitalize(String s) => s[0].toUpperCase() + s.substring(1);
 
-  /// Returns an [Image] widget displaying a player's headshot based on their name.
+  /// Returns a [CachedNetworkImage] widget for the given player's image.
   ///
-  /// The player's name is split into a list of strings [nameSplit], where the
-  /// first element is the player's first name and the second element is the
-  /// player's last name. The image is retrieved from the assets folder
-  /// 'assets/player_headshots/' using a filename formatted as
-  /// 'FirstName_LastName.png'. If the image asset does not exist, a default
-  /// 'Blank.png' image is displayed instead.
+  /// The image is retrieved from the 'player_images' bucket in Supabase
+  /// Storage. The path to the image is constructed by concatenating the
+  /// first and last names of the player, separated by an underscore.
   ///
-  /// [nameSplit] A list containing the first and last name of the player.
-  ///
-  /// Returns an [Image] widget displaying the player's headshot or a default
-  /// image if the specific headshot is not found.
-  static Image getPlayerImage(List<String> nameSplit) {
-    var path =
-        'assets/player_headshots/${capitalize(nameSplit[0])}_${nameSplit[1]}.png';
+  /// A [CircularProgressIndicator] is used as a placeholder while the image
+  /// is loading, and a blank image is used if the image fails to load.
+  static CachedNetworkImage getPlayerImage(String name) {
+    List<String> nameSplit = name.split(' ');
+    var path = Supabase.instance.client.storage
+        .from('player_images')
+        .getPublicUrl('${nameSplit[0]}_${nameSplit[1]}.png');
 
-    return Image.asset(
-      path,
-      errorBuilder: (context, error, stackTrace) {
-        return Image.asset('assets/player_headshots/Blank.png');
-      },
+    return CachedNetworkImage(
+      imageUrl: path,
+      placeholder: (context, url) => const CircularProgressIndicator(),
+      errorWidget: (context, url, error) =>
+          const Image(image: AssetImage('assets/player_headshots/Blank.png')),
+    );
+  }
+
+  static CachedNetworkImage getTeamImage(String name) {
+    var path = Supabase.instance.client.storage
+        .from('team_images')
+        .getPublicUrl('$name.png');
+    return CachedNetworkImage(
+      imageUrl: path,
+      placeholder: (context, url) => const CircularProgressIndicator(),
+      errorWidget: (context, url, error) =>
+          const Icon(Icons.error, color: Colors.grey),
     );
   }
 
@@ -54,7 +64,6 @@ class Methods {
         ));
     return seasonsDropdownItems;
   }
-
 
   static List<DropdownMenuItem<String>> createTeamDropdown() {
     List<DropdownMenuItem<String>> teamsDropdownItems = [];
