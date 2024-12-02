@@ -28,10 +28,14 @@ class Methods {
   }
 
   static CachedNetworkImage getTeamImage(String name) {
+
     var path = Supabase.instance.client.storage
         .from('team_images')
         .getPublicUrl('$name.png');
+
     return CachedNetworkImage(
+      width: 40,
+      height: 40,
       imageUrl: path,
       placeholder: (context, url) => const CircularProgressIndicator(),
       errorWidget: (context, url, error) =>

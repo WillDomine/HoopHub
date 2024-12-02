@@ -148,6 +148,9 @@ class _HomePageState extends State<HomePage> {
                         value: seasonSelectedValue),
                   ]),
                   const Divider(height: 20, thickness: 2.0),
+                  teamSelectedValue != '' && seasonSelectedValue != ''
+                      ? const Text('All Teams and Seasons')
+                      : const SizedBox(),
                   StreamBuilder(
                       stream: Supabase.instance.client
                           .rpc('search_player', params: {
