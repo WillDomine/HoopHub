@@ -149,7 +149,46 @@ class _HomePageState extends State<HomePage> {
                   ]),
                   const Divider(height: 20, thickness: 2.0),
                   teamSelectedValue != '' && seasonSelectedValue != ''
-                      ? const Text('All Teams and Seasons')
+                      ? Card(
+                          child: Padding(
+                            padding: const EdgeInsets.all(5.0),
+                            child: ListTile(
+                              leading: Methods.getTeamImage(teamSelectedValue!),
+                              title: StreamBuilder(
+                                  stream: Supabase.instance.client
+                                      .from('team_year_stats')
+                                      .select('pts_per_game')
+                                      .eq('abbreviation',
+                                          teamSelectedValue ?? '')
+                                      .eq('season',
+                                          int.parse(seasonSelectedValue ?? '0'))
+                                      .limit(1)
+                                      .asStream(),
+                                  builder: (context, snapshot) {
+                                    if (snapshot.connectionState ==
+                                        ConnectionState.waiting) {
+                                      return const CircularProgressIndicator();
+                                    }
+                                    if (snapshot.hasError) {
+                                      print(snapshot.error);
+                                      return const Text('Database error!');
+                                    }
+                                    if (!snapshot.hasData) {
+                                      return const Text('No data available');
+                                    }
+                                    if (snapshot.data!.isEmpty) {
+                                      return const Text('No data available');
+                                    }
+                                    return Text(
+                                      "${double.parse(snapshot.data![0]['pts_per_game']).round()} Points Per Game",
+                                      style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 15),
+                                    );
+                                  }),
+                            ),
+                          ),
+                        )
                       : const SizedBox(),
                   StreamBuilder(
                       stream: Supabase.instance.client
