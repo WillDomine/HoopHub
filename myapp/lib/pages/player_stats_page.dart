@@ -4,6 +4,7 @@ import 'package:myapp/models/player_model_tile.dart';
 import 'package:myapp/methods.dart';
 import 'package:myapp/models/player_model_profile.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 class PlayerStatsPage extends StatefulWidget {
   final PlayerModelTile player;
@@ -26,6 +27,8 @@ class _PlayerStatsPageState extends State<PlayerStatsPage> {
   bool hof = false;
 
   bool? saved;
+
+  ItemScrollController itemScrollController = ItemScrollController();
   @override
   void initState() {
     super.initState();
@@ -99,7 +102,13 @@ class _PlayerStatsPageState extends State<PlayerStatsPage> {
 
   @override
   Widget build(BuildContext context) {
-    var nameSplit = widget.player.playerName.split(' ');
+    Future.delayed(const Duration(seconds: 1), () {
+      itemScrollController.scrollTo(
+          index: playerData.indexWhere(
+              (element) => element.season == int.parse(selectedSeason ?? '0')),
+          duration: const Duration(seconds: 1));
+    });
+
     return Scaffold(
         appBar: AppBar(
           title: Text(
@@ -148,7 +157,8 @@ class _PlayerStatsPageState extends State<PlayerStatsPage> {
               ),
               const Divider(height: 20, thickness: 2.0),
               Expanded(
-                child: ListView.builder(
+                child: ScrollablePositionedList.builder(
+                    itemScrollController: itemScrollController,
                     shrinkWrap: true,
                     itemCount: playerData.length,
                     itemBuilder: (context, index) {
