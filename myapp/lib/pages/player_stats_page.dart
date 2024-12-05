@@ -5,6 +5,8 @@ import 'package:myapp/methods.dart';
 import 'package:myapp/models/player_model_profile.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
+import 'package:myapp/radar_chart_max_min.dart';
+import 'package:fl_chart/fl_chart.dart';
 
 class PlayerStatsPage extends StatefulWidget {
   final PlayerModelTile player;
@@ -102,7 +104,11 @@ class _PlayerStatsPageState extends State<PlayerStatsPage> {
 
   @override
   Widget build(BuildContext context) {
-    Future.delayed(const Duration(seconds: 1), () {
+    if (playerData.isEmpty) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    Future.delayed(const Duration(seconds: 2), () {
       itemScrollController.scrollTo(
           index: playerData.indexWhere(
               (element) => element.season == int.parse(selectedSeason ?? '0')),
@@ -162,6 +168,67 @@ class _PlayerStatsPageState extends State<PlayerStatsPage> {
                     shrinkWrap: true,
                     itemCount: playerData.length,
                     itemBuilder: (context, index) {
+                      if (playerData[index].fgPercent == 'NA') {
+                        playerData[index].fgPercent = '0';
+                      }
+                      double fgPercentage =
+                          double.parse(playerData[index].fgPercent);
+                      if (playerData[index].x3Percent == 'NA') {
+                        playerData[index].x3Percent = '0';
+                      }
+                      double x3Percentage =
+                          double.parse(playerData[index].x3Percent);
+                      if (playerData[index].ftPercent == 'NA') {
+                        playerData[index].ftPercent = '0';
+                      }
+                      double ftPercentage =
+                          double.parse(playerData[index].ftPercent);
+                      double efgPercentage = (fgPercentage + x3Percentage) / 2;
+                      List<String> dataSetTitles = [
+                        'FG%-${fgPercentage.isNaN ? 0 : (fgPercentage * 100).toStringAsFixed(2)}%',
+                        '3P%-${x3Percentage.isNaN ? 0 : (x3Percentage * 100).toStringAsFixed(2)}%',
+                        'FT%-${ftPercentage.isNaN ? 0 : (ftPercentage * 100).toStringAsFixed(2)}%',
+                        'eFG%-${efgPercentage.isNaN ? 0 : (efgPercentage * 100).toStringAsFixed(2)}%',
+                      ];
+                      RadarDataSet dataSet = RadarDataSet(dataEntries: [
+                        RadarEntry(
+                            value: fgPercentage.isNaN ? 0 : fgPercentage * 100),
+                        RadarEntry(
+                            value: x3Percentage.isNaN ? 0 : x3Percentage * 100),
+                        RadarEntry(
+                          value: ftPercentage.isNaN ? 0 : ftPercentage * 100,
+                        ),
+                        RadarEntry(
+                            value: (efgPercentage.isNaN
+                                ? 0
+                                : efgPercentage * 100)),
+                      ]);
+
+                      RadarChartDataFixMinMax radarChartDataFixMinMax =
+                          RadarChartDataFixMinMax(
+                        max: const RadarEntry(value: 100),
+                        min: const RadarEntry(value: 20),
+                        dataSets: [dataSet],
+                        getTitle: (index, _) =>
+                            RadarChartTitle(text: dataSetTitles[index]),
+                        tickCount: 4,
+                        radarBorderData:
+                            BorderSide(color: Theme.of(context).hintColor),
+                        radarShape: RadarShape.polygon,
+                        radarBackgroundColor: Colors.transparent,
+                        ticksTextStyle: TextStyle(
+                            color: Theme.of(context).hintColor, fontSize: 8),
+                        tickBorderData:
+                            BorderSide(color: Theme.of(context).hintColor),
+                        gridBorderData:
+                            BorderSide(color: Theme.of(context).hintColor),
+                        titlePositionPercentageOffset: 0.45,
+                        titleTextStyle: TextStyle(
+                            color: Theme.of(context).hintColor,
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold),
+                      );
+
                       return ExpansionTile(
                           collapsedTextColor: Colors.grey,
                           initiallyExpanded: selectedSeason ==
@@ -180,15 +247,63 @@ class _PlayerStatsPageState extends State<PlayerStatsPage> {
                                     padding: const EdgeInsets.all(10.0),
                                     child: Column(children: [
                                       Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Text(
+                                              'Points Per Game: ${playerData[index].ptsPerGame}',
+                                              style: const TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 20)),
+                                        ],
+                                      ),
+                                      const Divider(height: 20, thickness: 2.0),
+                                      const SizedBox(
+                                        height: 25,
+                                      ),
+                                      SizedBox(
+                                        width: 200,
+                                        height: 200,
+                                        child: RadarChart(
+                                          radarChartDataFixMinMax,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 25),
+                                      const Divider(
+                                        thickness: 2.0,
+                                      ),
+                                      Row(
                                           mainAxisAlignment:
                                               MainAxisAlignment.spaceEvenly,
                                           children: [
-                                            Text(
-                                                'FG: ${playerData[index].fgPercent}'),
-                                            Text(
-                                                '3PT: ${playerData[index].x3Percent}'),
-                                            Text(
-                                                'FT: ${playerData[index].ftPercent}'),
+                                            Tooltip(
+                                              triggerMode:
+                                                  TooltipTriggerMode.tap,
+                                              message: 'Assists per game',
+                                              child: Text(
+                                                  'APG: ${playerData[index].astPerGame}'),
+                                            ),
+                                            Tooltip(
+                                              triggerMode:
+                                                  TooltipTriggerMode.tap,
+                                              message: 'Rebounds per game',
+                                              child: Text(
+                                                  'RPG: ${playerData[index].rebPerGame}'),
+                                            ),
+                                            Tooltip(
+                                              triggerMode:
+                                                  TooltipTriggerMode.tap,
+                                              message: 'Steals per game',
+                                              child: Text(
+                                                  'SPG: ${playerData[index].stlPerGame}'),
+                                            ),
+                                            Tooltip(
+                                              triggerMode:
+                                                  TooltipTriggerMode.tap,
+                                              message: 'Blocks per game',
+                                              child: Text(
+                                                  'BPG: ${playerData[index].blkPerGame}'),
+                                            ),
                                           ])
                                     ])))
                           ]);

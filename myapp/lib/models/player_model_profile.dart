@@ -4,20 +4,30 @@ class PlayerModelProfile {
   final String pos;
   final String team;
   final int games;
-  final String fgPercent;
-  final String x3Percent;
-  final String ftPercent;
+  String fgPercent;
+  String x3Percent;
+  String ftPercent;
+  final String astPerGame;
+  final String rebPerGame;
+  final String stlPerGame;
+  final String blkPerGame;
+  final double ptsPerGame;
 
   factory PlayerModelProfile.fromJson(Map<String, dynamic> json) {
     return PlayerModelProfile(
       season: json['season'],
       playerId: json['player_id'],
-      pos: json['pos'],
-      team: json['tm'],
-      games: json['g'],
-      fgPercent: json['fg_percent'],
-      x3Percent: json['x3p_percent'],
-      ftPercent: json['ft_percent'],
+      pos: json['pos'] ?? '',
+      team: json['tm'] ?? 'TOT',
+      games: json['g'] ?? 0,
+      fgPercent: json['fg_percent'] ?? '0',
+      x3Percent: json['x3p_percent'] ?? '0',
+      ftPercent: json['ft_percent'] ?? '0',
+      astPerGame: json['ast_per_game'] ?? '0',
+      rebPerGame: json['trb_per_game'] ?? '0',
+      stlPerGame: json['stl_per_game'] ?? '0',
+      blkPerGame: json['blk_per_game'] ?? '0',
+      ptsPerGame: json['pts_per_game'].toDouble() ?? 0.0,
     );
   }
 
@@ -30,5 +40,10 @@ class PlayerModelProfile {
     required this.fgPercent,
     required this.x3Percent,
     required this.ftPercent,
+    required this.astPerGame,
+    required this.rebPerGame,
+    required this.stlPerGame,
+    required this.blkPerGame,
+    required this.ptsPerGame,
   });
 }
