@@ -41,14 +41,6 @@ class _UserPageState extends State<UserPage> {
 
   @override
   Widget build(BuildContext context) {
-    if (savedPlayers.isEmpty) {
-      return const Scaffold(
-        body: Center(
-          child: Text('No saved players'),
-        ),
-      );
-    }
-
     return Scaffold(
         appBar: AppBar(
           title: const Text('Saved Players'),
