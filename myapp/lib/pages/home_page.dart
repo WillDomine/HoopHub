@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:myapp/pages/player_stats_page.dart';
 import 'package:myapp/models/player_model_tile.dart';
-import 'package:myapp/methods.dart';
+import 'package:myapp/managers/methods.dart';
 import 'package:myapp/pages/user_page.dart';
 
 class HomePage extends StatefulWidget {

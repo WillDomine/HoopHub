@@ -23,12 +23,11 @@ class Methods {
       imageUrl: path,
       placeholder: (context, url) => const CircularProgressIndicator(),
       errorWidget: (context, url, error) =>
-          const Image(image: AssetImage('assets/player_headshots/Blank.png')),
+          const Image(image: AssetImage('assets/Blank.png')),
     );
   }
 
   static CachedNetworkImage getTeamImage(String name) {
-
     var path = Supabase.instance.client.storage
         .from('team_images')
         .getPublicUrl('$name.png');

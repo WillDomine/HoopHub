@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:myapp/models/player_model_tile.dart';
-import 'package:myapp/methods.dart';
+import 'package:myapp/managers/methods.dart';
 import 'package:myapp/models/player_model_profile.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:myapp/radar_chart_max_min.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:myapp/managers/comparing_manager.dart';
 
 class PlayerStatsPage extends StatefulWidget {
   final PlayerModelTile player;
@@ -31,6 +32,9 @@ class _PlayerStatsPageState extends State<PlayerStatsPage> {
   bool? saved;
 
   ItemScrollController itemScrollController = ItemScrollController();
+
+  ComparingManager comparingManager = ComparingManager();
+
   @override
   void initState() {
     super.initState();
@@ -112,7 +116,7 @@ class _PlayerStatsPageState extends State<PlayerStatsPage> {
       itemScrollController.scrollTo(
           index: playerData.indexWhere(
               (element) => element.season == int.parse(selectedSeason ?? '0')),
-          duration: const Duration(seconds: 1));
+          duration: const Duration(milliseconds: 100));
     });
 
     return Scaffold(
@@ -304,7 +308,26 @@ class _PlayerStatsPageState extends State<PlayerStatsPage> {
                                               child: Text(
                                                   'BPG: ${playerData[index].blkPerGame}'),
                                             ),
-                                          ])
+                                          ]),
+                                      const Divider(height: 20, thickness: 2.0),
+                                      Row(
+                                        children: [
+                                          Expanded(
+                                              child: TextButton(
+                                                  style: TextButton.styleFrom(
+                                                      backgroundColor:
+                                                          Colors.green,
+                                                      foregroundColor:
+                                                          Colors.white),
+                                                  onPressed: () {
+                                                    comparingManager.setPlayer(
+                                                        playerData[index],
+                                                        context);
+                                                  },
+                                                  child:
+                                                      const Text('Compare'))),
+                                        ],
+                                      )
                                     ])))
                           ]);
                     }),
