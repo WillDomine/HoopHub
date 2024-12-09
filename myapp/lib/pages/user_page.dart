@@ -61,9 +61,7 @@ class _UserPageState extends State<UserPage> {
                 icon: const Icon(Icons.logout)),
             IconButton(
                 icon: Icon(false ? Icons.dark_mode : Icons.light_mode),
-                onPressed: () {
-                  print(savedPlayers);
-                }),
+                onPressed: () {}),
           ],
         ),
         body: Scaffold(
