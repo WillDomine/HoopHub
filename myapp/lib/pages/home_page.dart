@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:myapp/pages/compare_page.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:myapp/pages/player_stats_page.dart';
 import 'package:myapp/models/player_model_tile.dart';
@@ -278,6 +279,15 @@ class _HomePageState extends State<HomePage> {
         title: const Text('Home Page'),
         centerTitle: false,
         actions: [
+          IconButton(
+              onPressed: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const ComparePage(),
+                    ));
+              },
+              icon: const Icon(Icons.compare_arrows)),
           IconButton(
             icon: const Icon(Icons.person),
             onPressed: () {

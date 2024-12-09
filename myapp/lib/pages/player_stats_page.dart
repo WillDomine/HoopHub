@@ -112,13 +112,6 @@ class _PlayerStatsPageState extends State<PlayerStatsPage> {
       return const Center(child: CircularProgressIndicator());
     }
 
-    Future.delayed(const Duration(seconds: 2), () {
-      itemScrollController.scrollTo(
-          index: playerData.indexWhere(
-              (element) => element.season == int.parse(selectedSeason ?? '0')),
-          duration: const Duration(milliseconds: 100));
-    });
-
     return Scaffold(
         appBar: AppBar(
           title: Text(

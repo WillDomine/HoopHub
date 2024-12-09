@@ -1,6 +1,7 @@
 class PlayerModelProfile {
   final int season;
   final int playerId;
+  final String playerName;
   final String pos;
   final String team;
   final int games;
@@ -17,6 +18,7 @@ class PlayerModelProfile {
     return PlayerModelProfile(
       season: json['season'],
       playerId: json['player_id'],
+      playerName: json['player'],
       pos: json['pos'] ?? '',
       team: json['tm'] ?? 'TOT',
       games: json['g'] ?? 0,
@@ -34,6 +36,7 @@ class PlayerModelProfile {
   PlayerModelProfile({
     required this.season,
     required this.playerId,
+    required this.playerName,
     required this.pos,
     required this.team,
     required this.games,

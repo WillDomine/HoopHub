@@ -30,6 +30,18 @@ class ComparingManager {
     );
   }
 
+  void reset() {
+    player1 = null;
+    player2 = null;
+  }
+
+  bool checkIfBothPlayersSelected() {
+    if (player1 != null && player2 != null) {
+      return true;
+    }
+    return false;
+  }
+
   void setPlayer(PlayerModelProfile player, BuildContext context) {
     if (player1 == player || player2 == player) {
       SnackBar snackBar = const SnackBar(
@@ -40,17 +52,42 @@ class ComparingManager {
       return;
     }
 
+    SnackBar snackBarPlayer1 = const SnackBar(
+      duration: Duration(seconds: 1),
+      content: Text('Player 1 selected'),
+    );
+
+    SnackBar snackBarPlayer2 = const SnackBar(
+      duration: Duration(seconds: 1),
+      content: Text('Player 2 selected'),
+    );
+
     if (player1 == null) {
       player1 = player;
+
+      ScaffoldMessenger.of(context).showSnackBar(snackBarPlayer1);
+      return;
       // ignore: prefer_conditional_assignment
     } else if (player2 == null) {
       player2 = player;
+
+      ScaffoldMessenger.of(context).showSnackBar(snackBarPlayer2);
+      return;
     }
 
-    if (player1 != null && player2 != null) {
+    if (checkIfBothPlayersSelected()) {
       showDialog(context: context, builder: (_) => choosePlayerSlot(context))
           .then((value) => {
-                print(value),
+                if (value == 1)
+                  {
+                    player1 = player,
+                    ScaffoldMessenger.of(context).showSnackBar(snackBarPlayer1)
+                  }
+                else if (value == 2)
+                  {
+                    player2 = player,
+                    ScaffoldMessenger.of(context).showSnackBar(snackBarPlayer2)
+                  }
               });
     }
   }
