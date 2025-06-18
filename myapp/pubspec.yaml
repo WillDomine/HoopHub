@@ -46,6 +46,7 @@ dependencies:
   cached_svg_image: ^0.0.7
   scrollable_positioned_list: ^0.3.8
   fl_chart: ^0.69.2
+  flutter_dotenv: ^5.2.1
 
 dev_dependencies:
   flutter_test:
